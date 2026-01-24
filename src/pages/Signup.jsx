@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 import InputField from "../components/common/InputField.jsx";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-
+import { Link } from "react-router-dom";
 export default function Signup() {
   const [formData, setFormData] = useState({
     username: "",
@@ -133,9 +133,9 @@ export default function Signup() {
 
         <p className="text-center text-sm mt-6 text-gray-600">
           Already have an account?{" "}
-          <a href="/login" className="text-purple-600 font-semibold hover:underline">
+          <Link to="/login" className="text-purple-600 font-semibold hover:underline">
             Login
-          </a>
+          </Link>
         </p>
       </form>
     </div>

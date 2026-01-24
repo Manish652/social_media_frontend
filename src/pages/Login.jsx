@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 import InputField from "../components/common/InputField.jsx";
 import { userAuth } from "../context/AuthContext.jsx";
-
+import { Link } from "react-router-dom";
 export default function Login() {
   const [formData, setFormData] = useState({
     email: "",
@@ -79,9 +79,9 @@ export default function Login() {
 
         <p className="text-center text-sm mt-6 text-gray-600">
           Don't have an account?{" "}
-          <a href="/signup" className="text-purple-600 font-semibold hover:underline">
+          <Link to="/signup" className="text-purple-600 font-semibold hover:underline">
             Sign Up
-          </a>
+          </Link>
         </p>
       </form>
     </div>
