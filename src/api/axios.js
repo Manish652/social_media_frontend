@@ -2,7 +2,7 @@ import axios from "axios";
 import getToken from "../utils/getToken.js";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://socialmediabackend-production-0a44.up.railway.app/api",
   withCredentials: true,
   timeout: 600000, 
 });
