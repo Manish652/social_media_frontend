@@ -38,52 +38,54 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-md mx-4 border border-gray-100"
-      >
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            Welcome Back
-          </h2>
-          <p className="text-gray-500 text-sm">Login to continue</p>
-        </div>
-
-        <InputField
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="your@email.com"
-          required
-        />
-        <InputField
-          label="Password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Enter your password"
-          required
-        />
-
-        <button
-          type="submit"
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl mt-6 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          disabled={loading}
-        >
-          {loading ? "Logging In..." : "Login"}
-        </button>
-
-        <p className="text-center text-sm mt-6 text-gray-600">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-purple-600 font-semibold hover:underline">
-            Sign Up
-          </Link>
-        </p>
-      </form>
+<div className="flex justify-center items-center h-screen overflow-y-auto overflow-x-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4">
+  <form
+    onSubmit={handleSubmit}
+    className="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-5 sm:p-8 w-full max-w-md border border-white"
+  >
+    <div className="text-center mb-4">
+      <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1">
+        Welcome Back
+      </h2>
+      <p className="text-gray-500 text-xs sm:text-sm">Login to continue</p>
     </div>
+
+    <div className="space-y-3">
+      <InputField
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        placeholder="your@email.com"
+        required
+      />
+      <InputField
+        label="Password"
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleChange}
+        placeholder="Enter your password"
+        required
+      />
+    </div>
+
+    <button
+      type="submit"
+      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-2.5 sm:py-3 rounded-xl mt-4 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95"
+      disabled={loading}
+    >
+      {loading ? "Logging In..." : "Login"}
+    </button>
+
+    <p className="text-center text-xs sm:text-sm mt-4 text-gray-600">
+      Don't have an account?{" "}
+      <Link to="/signup" className="text-purple-600 font-semibold hover:underline">
+        Sign Up
+      </Link>
+    </p>
+  </form>
+</div>
   );
 }

@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import './App.css';
 import BottomTab from "./components/common/BottomNav.jsx";
 import Navbar from './components/common/Navbar.jsx';
@@ -17,9 +17,12 @@ import Search from "./pages/Search.jsx";
 import Signup from "./pages/Signup.jsx";
 
 function App() {
+  const location = useLocation();
+  const hideLayout = ["/login", "/signup"].includes(location.pathname);
+  const { token } = userAuth() || {};
   return (
     <>
-      <Navbar />
+      {!hideLayout && <Navbar />}
       <Routes>
         <Route
           path='/'

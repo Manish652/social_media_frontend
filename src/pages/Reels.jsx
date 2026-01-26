@@ -234,8 +234,12 @@ export default function Reels() {
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="h-screen overflow-y-scroll snap-y snap-mandatory bg-black"
-      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      className="h-screen overflow-y-scroll snap-y snap-mandatory bg-black relative"
+      style={{ 
+        scrollbarWidth: 'none', 
+        msOverflowStyle: 'none',
+        paddingBottom: 'env(safe-area-inset-bottom)'
+      }}
     >
       <style>{`
         div::-webkit-scrollbar { display: none; }
@@ -244,6 +248,13 @@ export default function Reels() {
           to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
         .animate-fade-in { animation: fade-in 0.3s ease-out; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        
+        @media (max-width: 640px) {
+          .mobile-bottom-gradient {
+            height: 40vh !important;
+          }
+        }
       `}</style>
 
       {reels.map((reel, index) => {
@@ -280,7 +291,7 @@ export default function Reels() {
               <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/70 via-black/30 to-transparent"></div>
 
               {/* Bottom Gradient */}
-              <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-64 mobile-bottom-gradient bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
 
               {/* Play/Pause Overlay */}
               {showControls && (
@@ -316,51 +327,51 @@ export default function Reels() {
               )}
 
               {/* User Info & Caption */}
-              <div className="absolute bottom-24 left-4 right-20 pointer-events-none z-10">
+              <div className="absolute bottom-20 sm:bottom-24 left-4 right-20 sm:right-24 pointer-events-none z-10 pb-safe">
                 {reel.userId && (
                   <Link
                    to={`/u/${reel.userId._id}`}
 
-                    className="inline-flex items-center gap-3 mb-3 pointer-events-auto group"
+                    className="inline-flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 pointer-events-auto group"
                   >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 p-0.5 ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 p-0.5 ring-2 ring-white/50 group-hover:ring-white/80 transition-all">
                       <img
                         src={reel.userId.profilePicture || "https://via.placeholder.com/48"}
                         alt={reel.userId.username || "User"}
                         className="w-full h-full rounded-full object-cover"
                       />
                     </div>
-                    <span className="text-white font-semibold text-lg drop-shadow-lg group-hover:scale-105 transition-transform">
+                    <span className="text-white font-semibold text-base sm:text-lg drop-shadow-lg group-hover:scale-105 transition-transform">
                       @{reel.userId.username || "User"}
                     </span>
                   </Link>
                 )}
 
                 {reel.caption && (
-                  <div className="text-white text-sm leading-relaxed drop-shadow-lg backdrop-blur-sm bg-black/20 rounded-lg p-3 max-w-md">
+                  <div className="text-white text-xs sm:text-sm leading-relaxed drop-shadow-lg backdrop-blur-sm bg-black/20 rounded-lg p-2 sm:p-3 max-w-xs sm:max-w-md">
                     {reel.caption}
                   </div>
                 )}
               </div>
 
               {/* Right Side Actions */}
-              <div className="absolute right-4 bottom-24 flex flex-col gap-6 pointer-events-auto z-10">
+              <div className="absolute right-3 sm:right-4 bottom-20 sm:bottom-24 flex flex-col gap-3 sm:gap-6 pointer-events-auto z-10 pb-safe">
                 {/* Like */}
                 <button
                   onClick={() => handleLike(reel._id, index)}
-                  className="flex flex-col items-center gap-2 group"
+                  className="flex flex-col items-center gap-1 sm:gap-2 group"
                 >
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-lg ${isLiked
+                  <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-lg ${isLiked
                     ? 'bg-gradient-to-br from-pink-500 to-red-500 scale-110'
                     : 'bg-white/20 hover:bg-white/30 hover:scale-110'
                     }`}>
                     <Heart
-                      className={`w-7 h-7 transition-all ${isLiked ? 'text-white' : 'text-white'
+                      className={`w-6 h-6 sm:w-7 sm:h-7 transition-all ${isLiked ? 'text-white' : 'text-white'
                         }`}
                       fill={isLiked ? 'white' : 'none'}
                     />
                   </div>
-                  <span className="text-white text-sm font-semibold drop-shadow-lg">
+                  <span className="text-white text-xs sm:text-sm font-semibold drop-shadow-lg">
                     {reel.likes?.length || 0}
                   </span>
                 </button>
@@ -368,40 +379,40 @@ export default function Reels() {
                 {/* Comment */}
                 <button
                   onClick={() => openComments(reel._id)}
-                  className="flex flex-col items-center gap-2 group"
+                  className="flex flex-col items-center gap-1 sm:gap-2 group"
                 >
-                  <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
-                    <MessageCircle className="w-7 h-7 text-white" />
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
+                    <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
-                  <span className="text-white text-sm font-semibold drop-shadow-lg">
+                  <span className="text-white text-xs sm:text-sm font-semibold drop-shadow-lg">
                     {reel.comments?.length || 0}
                   </span>
                 </button>
 
                 {/* Share */}
-                <button className="flex flex-col items-center gap-2 group">
-                  <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
-                    <Send className="w-7 h-7 text-white" />
+                <button className="flex flex-col items-center gap-1 sm:gap-2 group">
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
+                    <Send className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
                 </button>
 
                 {/* More */}
-                <button className="flex flex-col items-center gap-2 group">
-                  <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
-                    <MoreVertical className="w-7 h-7 text-white" />
+                <button className="flex flex-col items-center gap-1 sm:gap-2 group">
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
+                    <MoreVertical className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
                 </button>
 
                 {/* Mute/Unmute */}
                 <button
                   onClick={() => setMuted(!muted)}
-                  className="flex flex-col items-center gap-2 group"
+                  className="flex flex-col items-center gap-1 sm:gap-2 group"
                 >
-                  <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all shadow-lg">
                     {muted ? (
-                      <VolumeX className="w-7 h-7 text-white" />
+                      <VolumeX className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                     ) : (
-                      <Volume2 className="w-7 h-7 text-white" />
+                      <Volume2 className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                     )}
                   </div>
                 </button>

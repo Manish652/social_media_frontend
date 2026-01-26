@@ -1,11 +1,13 @@
-import { Bell, LogOut } from "lucide-react";
+import { Film, Home, Plus, Search, User, Bell, LogOut } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
 import api from "../../api/axios.js";
 import { userAuth } from "../../context/AuthContext.jsx";
 
 export function Navbar({ onNotificationClick }) {
+  const { pathname } = useLocation();
+
   const { user, token, logout } = userAuth();
   const isAuthed = Boolean(token);
   const avatar = user?.profilePicture || "https://via.placeholder.com/32";
@@ -84,18 +86,32 @@ export function Navbar({ onNotificationClick }) {
           Vibe
         </Link>
 
-        {/* Search Bar */}
-        <div className="hidden md:flex items-center bg-gradient-to-r from-gray-50 to-purple-50/30 rounded-2xl px-4 py-2.5 w-full max-w-md border border-gray-200/50 focus-within:border-purple-300 focus-within:ring-4 focus-within:ring-purple-100 transition-all">
-          <FaSearch className="text-gray-400 mr-3 flex-shrink-0" size={16} />
-          <input
-            type="text"
-            placeholder="Search for people, posts, or tags..."
-            className="bg-transparent outline-none w-full text-sm placeholder:text-gray-400"
+        {/* Search Button - Desktop */}
+        <Link
+          to="/search"
+          className="hidden w-[400px] md:flex items-center gap-2 bg-gradient-to-r from-gray-50 to-purple-50/30 hover:from-purple-50 hover:to-pink-50 rounded-full px-5 py-2.5 border border-gray-200/50 hover:border-purple-300 transition-all group"
+        >
+          <Search 
+            size={18} 
+            className="text-gray-500 group-hover:text-purple-600 transition-colors" 
           />
-        </div>
+          <span className="text-sm text-gray-500 group-hover:text-purple-600 transition-colors">
+            Search for people, posts, and more
+
+
+          </span>
+        </Link>
 
         {/* Right Section */}
         <div className="flex items-center gap-2">
+          {/* Search Icon - Mobile */}
+          <Link
+            to="/search"
+            className="md:hidden p-2.5 hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 rounded-full transition-all hover:scale-105 active:scale-95 group"
+          >
+            <Search size={22} className="text-gray-700 group-hover:text-purple-600 transition-colors" />
+          </Link>
+
           {/* Notification Button */}
           <div className="relative">
             <button
@@ -194,18 +210,6 @@ export function Navbar({ onNotificationClick }) {
               </Link>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Mobile Search Bar */}
-      <div className="md:hidden px-4 pb-3">
-        <div className="flex items-center bg-gradient-to-r from-gray-50 to-purple-50/30 rounded-2xl px-4 py-2.5 border border-gray-200/50 focus-within:border-purple-300 focus-within:ring-4 focus-within:ring-purple-100 transition-all">
-          <FaSearch className="text-gray-400 mr-3 flex-shrink-0" size={16} />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-transparent outline-none w-full text-sm placeholder:text-gray-400"
-          />
         </div>
       </div>
     </div>
