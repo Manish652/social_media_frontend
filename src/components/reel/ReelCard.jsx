@@ -14,8 +14,7 @@ export default function ReelCard({ reel, onClick, onDelete, showDelete = false }
   return (
     <div
       onClick={onClick}
-      className="relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer group bg-black"
-    >
+      className="relative aspect-[9/16] rounded-xl overflow-hidden cursor-pointer group bg-black"y>
       {/* Thumbnail/Video Preview */}
       <video
         src={reel.videoUrl}
@@ -68,4 +67,3 @@ export default function ReelCard({ reel, onClick, onDelete, showDelete = false }
     </div>
   );
 }
-
