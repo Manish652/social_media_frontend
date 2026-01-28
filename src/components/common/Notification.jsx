@@ -99,7 +99,7 @@ export default function Notification({ token }) {
 
   const getTimeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    
+
     if (seconds < 60) return "just now";
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
@@ -115,16 +115,15 @@ export default function Notification({ token }) {
         className="relative p-2.5 rounded-full hover:bg-gradient-to-br from-purple-50 to-pink-50 transition-all duration-300 group"
         aria-label="Notifications"
       >
-        <Bell 
-          size={20} 
-          className={`transition-all duration-300 ${
-            openNotif 
-              ? 'text-purple-600 scale-110' 
+        <Bell
+          size={20}
+          className={`transition-all duration-300 ${openNotif
+              ? 'text-purple-600 scale-110'
               : 'text-gray-600 group-hover:text-purple-600'
-          }`}
+            }`}
           strokeWidth={2}
         />
-        
+
         {/* Unread Badge */}
         {hasUnread && (
           <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[10px] font-bold rounded-full shadow-lg animate-pulse ring-2 ring-white">
@@ -137,13 +136,22 @@ export default function Notification({ token }) {
       {openNotif && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setOpenNotif(false)}
           />
-          
+
           {/* Notification Panel */}
-          <div className="absolute right-0 mt-3 w-[380px] max-h-[500px] bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+          <div className=" fixed sm:absolute
+    left-2 right-2 sm:left-auto sm:right-0
+    mt-3
+    sm:w-[380px]
+    max-h-[500px]
+    bg-white/95 backdrop-blur-xl
+    border border-gray-200/50
+    rounded-2xl shadow-2xl
+    z-50 overflow-hidden
+    animate-in slide-in-from-top-2 duration-200">
             {/* Header */}
             <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-5 py-4 z-10">
               <div className="flex items-center justify-between">
@@ -157,7 +165,7 @@ export default function Notification({ token }) {
                     </p>
                   )}
                 </div>
-                
+
                 {hasAny && (
                   <button
                     onClick={clearAll}
@@ -190,9 +198,8 @@ export default function Notification({ token }) {
                   {notifications.map((n, index) => (
                     <div
                       key={n._id}
-                      className={`group px-5 py-4 flex gap-3 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all duration-200 ${
-                        !n.read ? 'bg-purple-50/30' : ''
-                      }`}
+                      className={`group px-5 py-4 flex gap-3 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all duration-200 ${!n.read ? 'bg-purple-50/30' : ''
+                        }`}
                       style={{
                         animation: `slideIn 0.3s ease-out ${index * 0.05}s both`
                       }}
@@ -219,10 +226,10 @@ export default function Notification({ token }) {
                             {n.type === "follow"
                               ? "started following you"
                               : n.type === "like"
-                              ? "liked your post"
-                              : n.type === "comment"
-                              ? "commented on your post"
-                              : "has an update"}
+                                ? "liked your post"
+                                : n.type === "comment"
+                                  ? "commented on your post"
+                                  : "has an update"}
                           </span>
                         </p>
                         <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">

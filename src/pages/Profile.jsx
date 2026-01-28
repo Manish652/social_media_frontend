@@ -219,7 +219,7 @@ export default function Profile() {
       />
 
       {/* Decorative background elements */}
-   
+
 
       <div className="relative max-w-2xl mx-auto px-4 py-6">
         {/* Profile Header Card */}
@@ -238,14 +238,23 @@ export default function Profile() {
 
               {/* Profile Info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+
                   <div className="flex-1 min-w-0">
-                    <h1 className="text-2xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent truncate">
+                    <h1 className="
+  text-xl sm:text-2xl 
+  font-black 
+  bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 
+  bg-clip-text text-transparent
+  break-words
+">
                       {profile.username}
                     </h1>
-                    <p className="text-gray-500 text-sm truncate">{profile.email}</p>
+                    <p className="text-gray-500 text-xs sm:text-sm break-all">
+                      {profile.email}
+                    </p>
                   </div>
-                  
+
                   {/* Create Story Button */}
                   <Link
                     to="/create-story"
@@ -253,8 +262,8 @@ export default function Profile() {
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400"></div>
                     <span className="relative flex items-center gap-2 text-white font-bold text-sm">
-                      <BookHeart size={16} strokeWidth={2}/>
-                     Create Story
+                      <BookHeart size={16} strokeWidth={2} />
+                      Create Story
                     </span>
                   </Link>
                 </div>
@@ -267,8 +276,9 @@ export default function Profile() {
                 )}
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                <button
                     onClick={() => {
                       setFollowModalType("followers");
                       setShowFollowModal(true);
@@ -290,10 +300,10 @@ export default function Profile() {
                     }}
                     className="bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-xl p-3 hover:from-pink-100 hover:to-pink-200/50 transition-all"
                   >
-                    <div className="text-2xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">
+                    <div className="text-2xl sm:text-sm font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">
                       {followingArr.length}
                     </div>
-                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">
+                    <div className="text-xs sm:text-sm text-gray-600 font-semibold uppercase tracking-wide">
                       Following
                     </div>
                   </button>
@@ -305,7 +315,7 @@ export default function Profile() {
           {/* Edit Profile Form */}
           <form onSubmit={handleSave} className="border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white p-6 space-y-4">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Edit Profile</h3>
-            
+
             {/* Profile Picture Upload */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Profile Picture</label>
@@ -387,9 +397,8 @@ export default function Profile() {
           <div className="grid grid-cols-3">
             <button
               onClick={() => setActiveTab("posts")}
-              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${
-                activeTab === "posts" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${activeTab === "posts" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+                }`}
             >
               {activeTab === "posts" && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
@@ -400,9 +409,8 @@ export default function Profile() {
 
             <button
               onClick={() => setActiveTab("reels")}
-              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${
-                activeTab === "reels" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${activeTab === "reels" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+                }`}
             >
               {activeTab === "reels" && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
@@ -413,9 +421,8 @@ export default function Profile() {
 
             <button
               onClick={() => setActiveTab("saved")}
-              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${
-                activeTab === "saved" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${activeTab === "saved" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+                }`}
             >
               {activeTab === "saved" && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
@@ -453,7 +460,7 @@ export default function Profile() {
                       key={post._id}
                       className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden"
                     >
-                      <PostCard post={post} isLiked={false} isSaved={false} onLike={() => {}} onSave={() => {}} />
+                      <PostCard post={post} isLiked={false} isSaved={false} onLike={() => { }} onSave={() => { }} />
                       {isOwner && (
                         <div className="flex gap-4 px-6 py-3 bg-gradient-to-r from-gray-50/80 to-purple-50/30 border-t border-gray-100">
                           <button
