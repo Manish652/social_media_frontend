@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bookmark, Film, Grid, Menu, Pencil, PlusCircle, Settings, Trash2 } from "lucide-react";
+import { Bookmark, Film, Grid, Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
 import ReelCard from "../components/reel/ReelCard.jsx";
-
 import { useParams } from "react-router-dom";
 import api from "../api/axios.js";
 import FollowListModal from "../components/common/FollowListModal.jsx";
@@ -79,21 +78,17 @@ export default function ProfilePublicView() {
 
   const handleFollow = async () => {
     updateFollowing(id, "follow");
-    // Optimistically update local profile
     setProfile(prev => ({
       ...prev,
       followers: [...(prev.followers || []), user._id]
     }));
     try {
       await api.post(`/follow/${id}/follow`);
-      // Refresh profile to get accurate count
       const { data } = await api.get(`/user/profile/${id}`);
       setProfile(data);
     } catch (e) {
       console.log(e);
-
       updateFollowing(id, "unfollow");
-      // Revert on error
       const { data } = await api.get(`/user/profile/${id}`);
       setProfile(data);
     }
@@ -101,20 +96,17 @@ export default function ProfilePublicView() {
 
   const handleUnfollow = async () => {
     updateFollowing(id, "unfollow");
-    // Optimistically update local profile
     setProfile(prev => ({
       ...prev,
       followers: (prev.followers || []).filter(fid => String(fid) !== String(user._id))
     }));
     try {
       await api.post(`/follow/${id}/unfollow`);
-      // Refresh profile to get accurate count
       const { data } = await api.get(`/user/profile/${id}`);
       setProfile(data);
     } catch (e) {
       console.error(e);
       updateFollowing(id, "follow");
-      // Revert on error
       const { data } = await api.get(`/user/profile/${id}`);
       setProfile(data);
     }
@@ -122,9 +114,12 @@ export default function ProfilePublicView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-20 h-20 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+          <div className="relative w-20 h-20">
+            <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-purple-600 rounded-full animate-spin"></div>
+          </div>
           <p className="text-gray-600 font-medium">Loading profile...</p>
         </div>
       </div>
@@ -136,7 +131,7 @@ export default function ProfilePublicView() {
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center border border-red-100">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-red-600 text-2xl">⚠</span>
+            <span className="text-red-600 text-2xl">⚠️</span>
           </div>
           <p className="text-red-600 font-semibold mb-2">Oops!</p>
           <p className="text-gray-600 text-sm">{error}</p>
@@ -162,8 +157,7 @@ export default function ProfilePublicView() {
   const followingCount = Array.isArray(profile.following) ? profile.following.length : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      {/* Follow List Modal */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
       <FollowListModal
         isOpen={showFollowModal}
         onClose={() => setShowFollowModal(false)}
@@ -172,68 +166,97 @@ export default function ProfilePublicView() {
         currentUserId={user?._id}
       />
 
-      {/* Header with animated gradient backdrop */}
-      <div className="relative bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 h-48 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-400/20 via-pink-400/20 to-transparent"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-400/20 via-purple-400/20 to-transparent"></div>
-        <div className="absolute inset-0 backdrop-blur-3xl opacity-50"></div>
+      {/* Animated Background Pattern */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-300/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-24 pb-12">
-        {/* Profile Card */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden transform transition-all duration-500 hover:shadow-purple-500/10 hover:shadow-3xl">
-          {/* Profile Header */}
-          <div className="p-8 sm:p-10">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-              {/* Avatar with animated gradient ring */}
-              <div className="relative group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 rounded-full opacity-75 group-hover:opacity-100 blur-md transition duration-500 animate-pulse"></div>
+      {/* Hero Header */}
+      <div className="relative">
+        <div className="h-64 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 relative overflow-hidden">
+          {/* Animated gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/50 via-transparent to-pink-600/50 animate-gradient"></div>
+          
+          {/* Decorative elements */}
+          <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+        </div>
+      </div>
+
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 -mt-32 pb-12 z-10">
+        {/* Main Profile Card */}
+        <div className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
+          <div className="p-6 sm:p-10">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              {/* Avatar Section */}
+              <div className="relative flex-shrink-0 group">
+                {/* Gradient ring animation */}
+                <div className="absolute -inset-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 rounded-full opacity-75 blur-lg group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                {/* Avatar container */}
                 <div className="relative">
                   <img
-                    src={profile.profilePicture || "https://via.placeholder.com/150"}
-                    alt="avatar"
-                    className="relative w-36 h-36 rounded-full object-cover border-4 border-white shadow-xl ring-4 ring-purple-100 transition-transform duration-300 group-hover:scale-105"
+                    src={profile.profilePicture || "/user.png"}
+                    alt={profile.username}
+                    className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white shadow-xl"
                   />
+                  
+                  {/* Status badge */}
                   {!isMe && (
-                    <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full p-1 shadow-lg transform transition-transform duration-200 hover:scale-110">
-                      <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center">
-                        {isFollowing ? (
-                          <span className="text-purple-600 text-lg">✓</span>
-                        ) : (
-                          <span className="text-purple-600 text-xl">+</span>
-                        )}
+                    <button
+                      onClick={isFollowing ? handleUnfollow : handleFollow}
+                      className="absolute -bottom-2 -right-2 group/btn"
+                    >
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full blur-md opacity-75"></div>
+                        <div className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                          isFollowing 
+                            ? 'bg-white border-2 border-purple-300' 
+                            : 'bg-gradient-to-r from-purple-600 to-pink-500'
+                        }`}>
+                          {isFollowing ? (
+                            <span className="text-purple-600 text-xl font-bold">✓</span>
+                          ) : (
+                            <span className="text-white text-2xl font-light">+</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </button>
                   )}
                 </div>
               </div>
 
-              {/* Profile Info */}
-              <div className="flex-1 text-center md:text-left w-full">
-                {/* Username and Follow Button Row */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              {/* Profile Information */}
+              <div className="flex-1 w-full text-center sm:text-left">
+                {/* Header Row */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                   <div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-1">
+                    <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent mb-1">
                       {profile.username}
                     </h1>
-                    <p className="text-gray-500 text-base font-medium">@{profile.username}</p>
+                    <p className="text-gray-500 font-medium">@{profile.username}</p>
                   </div>
 
-                  {/* Follow Button */}
+                  {/* Action Button */}
                   {!isMe && (
-                    <div className="flex justify-center md:justify-start">
+                    <div className="flex justify-center sm:justify-start">
                       {!isFollowing ? (
                         <button
                           onClick={handleFollow}
-                          className="group relative px-10 py-3.5 rounded-full bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white font-bold shadow-lg hover:shadow-2xl transform hover:-translate-y-1 active:translate-y-0 transition-all duration-300 overflow-hidden"
+                          className="group relative px-8 py-3 rounded-full font-bold text-white overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <span className="relative">Follow</span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                          <span className="relative flex items-center gap-2">
+                            <Sparkles size={16} />
+                            Follow
+                          </span>
                         </button>
                       ) : (
                         <button
                           onClick={handleUnfollow}
-                          className="px-10 py-3.5 rounded-full bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 text-purple-700 font-bold hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:border-purple-400 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-md hover:shadow-lg"
+                          className="px-8 py-3 rounded-full font-bold bg-white border-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 shadow-md"
                         >
                           Following
                         </button>
@@ -242,66 +265,53 @@ export default function ProfilePublicView() {
                   )}
                 </div>
 
-                {/* Bio Section */}
+                {/* Bio */}
                 {profile.bio && (
-                  <div className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-100 shadow-sm">
-                    <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                  <div className="mb-6 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-2xl p-4 border border-purple-100/50">
+                    <p className="text-gray-700 text-sm leading-relaxed">
                       {profile.bio}
                     </p>
                   </div>
                 )}
 
-                {/* Stats */}
-                <div className="flex items-center justify-center md:justify-start gap-6 md:gap-8">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   <button
                     onClick={() => {
                       setFollowModalType("followers");
                       setShowFollowModal(true);
                     }}
-                    className="relative group cursor-pointer"
+                    className="group relative bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl p-4 hover:from-purple-100 hover:to-purple-200/50 transition-all duration-300"
                   >
-                    <div className="absolute inset-0 bg-purple-100 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                    <div className="relative px-6 py-3">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        {followersCount}
-                      </div>
-                      <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                        Followers
-                      </div>
+                    <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {followersCount}
+                    </div>
+                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide mt-1">
+                      Followers
                     </div>
                   </button>
-
-                  <div className="w-px h-12 bg-gray-200"></div>
 
                   <button
                     onClick={() => {
                       setFollowModalType("following");
                       setShowFollowModal(true);
                     }}
-                    className="relative group cursor-pointer"
+                    className="group relative bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-2xl p-4 hover:from-pink-100 hover:to-pink-200/50 transition-all duration-300"
                   >
-                    <div className="absolute inset-0 bg-blue-100 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                    <div className="relative px-6 py-3">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        {followingCount}
-                      </div>
-                      <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                        Following
-                      </div>
+                    <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">
+                      {followingCount}
+                    </div>
+                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide mt-1">
+                      Following
                     </div>
                   </button>
 
-                  <div className="w-px h-12 bg-gray-200"></div>
-
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-pink-100 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                    <div className="relative px-6 py-3">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                        {posts.length}
-                      </div>
-                      <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                        Posts
-                      </div>
+                  <div className="relative bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl p-4">
+                    <div className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-orange-500 to-purple-600 bg-clip-text text-transparent">
+                      {posts.length}
+                    </div>
+                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide mt-1">
+                      Posts
                     </div>
                   </div>
                 </div>
@@ -310,119 +320,147 @@ export default function ProfilePublicView() {
           </div>
         </div>
 
-        {/* Tabs and Content Section */}
-        <div className="mt-8">
-          {/* Tabs */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 overflow-hidden mb-4">
-            <div className="flex">
+        {/* Content Section */}
+        <div className="mt-6">
+          {/* Tab Navigation */}
+          <div className="bg-white/90 backdrop-blur-2xl rounded-2xl shadow-lg border border-white/50 overflow-hidden mb-4">
+            <div className="grid grid-cols-3">
               <button
                 onClick={() => setActiveTab("posts")}
-                className={`flex-1 py-4 flex items-center justify-center gap-2 border-b-4 transition-all ${activeTab === "posts"
-                    ? "border-purple-500 text-purple-600 font-semibold bg-purple-50/50"
-                    : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                  }`}
+                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${
+                  activeTab === "posts"
+                    ? "text-purple-600"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
               >
-                <Grid size={22} />
+                {activeTab === "posts" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
+                )}
+                <Grid size={20} strokeWidth={2.5} />
                 <span className="hidden sm:inline">Posts</span>
               </button>
+
               <button
                 onClick={() => setActiveTab("reels")}
-                className={`flex-1 py-4 flex items-center justify-center gap-2 border-b-4 transition-all ${activeTab === "reels"
-                    ? "border-purple-500 text-purple-600 font-semibold bg-purple-50/50"
-                    : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                  }`}
+                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${
+                  activeTab === "reels"
+                    ? "text-purple-600"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
               >
-                <Film size={22} />
+                {activeTab === "reels" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
+                )}
+                <Film size={20} strokeWidth={2.5} />
                 <span className="hidden sm:inline">Reels</span>
               </button>
+
               <button
                 onClick={() => setActiveTab("saved")}
-                className={`flex-1 py-4 flex items-center justify-center gap-2 border-b-4 transition-all ${activeTab === "saved"
-                    ? "border-purple-500 text-purple-600 font-semibold bg-purple-50/50"
-                    : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                  }`}
+                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${
+                  activeTab === "saved"
+                    ? "text-purple-600"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
               >
-                <Bookmark size={22} />
+                {activeTab === "saved" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
+                )}
+                <Bookmark size={20} strokeWidth={2.5} />
                 <span className="hidden sm:inline">Saved</span>
               </button>
             </div>
           </div>
 
-          {/* Posts Tab */}
-          {activeTab === "posts" && (
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/20 overflow-hidden">
-              {posts.length === 0 ? (
-                <div className="p-16 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Grid size={32} className="text-purple-600" />
-                  </div>
-                  <p className="text-gray-500 font-medium">No posts yet</p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    {isMe ? "Share your first post!" : "Check back later for updates"}
-                  </p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {posts.map((post) => (
-                    <div
-                      key={post._id}
-                      className="p-6 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all duration-200"
-                    >
-                      <PostCard
-                        post={post}
-                        isLiked={false}
-                        isSaved={false}
-                        onLike={() => { }}
-                        onSave={() => { }}
-                      />
+          {/* Content Area */}
+          <div className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-lg border border-white/50 overflow-hidden">
+            {/* Posts Tab */}
+            {activeTab === "posts" && (
+              <>
+                {posts.length === 0 ? (
+                  <div className="p-16 text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Grid size={32} className="text-purple-600" strokeWidth={2} />
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Reels Tab */}
-          {activeTab === "reels" && (
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/20 overflow-hidden p-6">
-              {reels.length === 0 ? (
-                <div className="p-16 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Film size={32} className="text-purple-600" />
+                    <p className="text-gray-600 font-semibold text-lg">No posts yet</p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {isMe ? "Share your first post!" : "Check back later for updates"}
+                    </p>
                   </div>
-                  <p className="text-gray-500 font-medium">No reels yet</p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    {isMe ? "Create your first reel!" : "Check back later for reels"}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-2">
-                  {reels.map((reel) => (
-                    <ReelCard
-                      key={reel._id}
-                      reel={reel}
-                      onClick={() => {
-                        window.location.href = `/reels`;
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {posts.map((post) => (
+                      <div
+                        key={post._id}
+                        className="p-6 hover:bg-gradient-to-r hover:from-purple-50/30 hover:to-pink-50/30 transition-all duration-200"
+                      >
+                        <PostCard
+                          post={post}
+                          isLiked={false}
+                          isSaved={false}
+                          onLike={() => {}}
+                          onSave={() => {}}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
 
-          {/* Saved Tab */}
-          {activeTab === "saved" && (
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/20 overflow-hidden p-16 text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Bookmark size={32} className="text-purple-600" />
+            {/* Reels Tab */}
+            {activeTab === "reels" && (
+              <>
+                {reels.length === 0 ? (
+                  <div className="p-16 text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Film size={32} className="text-purple-600" strokeWidth={2} />
+                    </div>
+                    <p className="text-gray-600 font-semibold text-lg">No reels yet</p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {isMe ? "Create your first reel!" : "Check back later for reels"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 grid grid-cols-3 gap-2">
+                    {reels.map((reel) => (
+                      <ReelCard
+                        key={reel._id}
+                        reel={reel}
+                        onClick={() => {
+                          window.location.href = `/reels`;
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Saved Tab */}
+            {activeTab === "saved" && (
+              <div className="p-16 text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Bookmark size={32} className="text-purple-600" strokeWidth={2} />
+                </div>
+                <p className="text-gray-600 font-semibold text-lg">Saved posts are private</p>
+                <p className="text-gray-400 text-sm mt-1">Only you can see your saved posts</p>
               </div>
-              <p className="text-gray-500 font-medium">Saved posts are private</p>
-              <p className="text-gray-400 text-sm mt-1">Only you can see your saved posts</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes gradient {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradient 15s ease infinite;
+        }
+      `}</style>
     </div>
   );
 }

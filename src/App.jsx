@@ -15,15 +15,17 @@ import ProfilePublicView from "./pages/ProfilePublicView.jsx";
 import Reels from "./pages/Reels.jsx";
 import Search from "./pages/Search.jsx";
 import Signup from "./pages/Signup.jsx";
-
+import {Toaster} from "react-hot-toast"
 function App() {
   const location = useLocation();
   const hideLayout = ["/login", "/signup"].includes(location.pathname);
   const { token } = userAuth() || {};
   return (
     <>
+     <Toaster/>
       {!hideLayout && <Navbar />}
       <Routes>
+       
         <Route
           path='/'
           element={

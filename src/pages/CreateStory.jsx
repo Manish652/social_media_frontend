@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 import { getMediaType, uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-
+import toast from "react-hot-toast";
 export default function CreateStory() {
   const navigate = useNavigate();
   const [storyType, setStoryType] = useState("image"); // "image", "video", "text"
@@ -48,11 +48,11 @@ export default function CreateStory() {
 
     // Validation
     if (storyType === "text" && !text.trim()) {
-      alert("Please enter some text for your story");
+      ("Please enter some text for your story");
       return;
     }
     if ((storyType === "image" || storyType === "video") && !media) {
-      alert("Please select a media file");
+      toast.error("Please select a media file");
       return;
     }
 
@@ -86,11 +86,11 @@ export default function CreateStory() {
       await api.post("/story/create", payload);
 
       setUploadProgress("");
-      alert("Story created successfully!");
+      toast.success("Story created successfully!");
       navigate("/");
     } catch (err) {
       console.error("Create story error:", err);
-      alert(err?.response?.data?.message || "Failed to create story");
+      toast.error(err?.response?.data?.message || "Failed to create story");
       setUploadProgress("");
     } finally {
       setSubmitting(false);

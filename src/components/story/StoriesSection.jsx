@@ -46,7 +46,7 @@ export default function StoriesSection({ showCreateButton = true }) {
         byUser.set(uid, {
           id: uid,
           username: s?.user?.username || "User",
-          avatar: s?.user?.profilePicture || "https://via.placeholder.com/40",
+          avatar: s?.user?.profilePicture || "/user.png",
           hasStory: true,
           isCurrentUser: String(uid) === String(user?._id),
         });
@@ -60,6 +60,16 @@ export default function StoriesSection({ showCreateButton = true }) {
       return 0;
     });
   }, [stories, user?._id]);
+
+  if (!loading && stories.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full py-6 text-gray-400 text-sm">
+        {showCreateButton
+          ? "No stories yet — be the first to share ✨"
+          : "No stories to show. Follow people to see their updates 👀"}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -108,12 +118,8 @@ export default function StoriesSection({ showCreateButton = true }) {
                 />
               ))}
 
-            {/* Empty State */}
-            {!loading && stories.length === 0 && (
-              <div className="flex items-center justify-center w-full py-4 text-gray-400 text-sm">
-                No stories available. {showCreateButton ? "Create your first story!" : "Follow people to see their stories!"}
-              </div>
-            )}
+
+
           </div>
         </div>
       </div>

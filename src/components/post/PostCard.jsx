@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, MessageCircle, Bookmark, MoreHorizontal, Trash2 } from "lucide-react";
 import api from "../../api/axios.js";
 import { userAuth } from "../../context/AuthContext.jsx";
+import toast from "react-hot-toast";
 function formatTimeAgo(dateStr) {
   try {
     const d = new Date(dateStr);
@@ -128,7 +129,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300">
+    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 relativeoverflow-hidden hover:shadow-2xl transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-white via-purple-50/20 to-pink-50/20">
         <div className="flex items-center gap-3">

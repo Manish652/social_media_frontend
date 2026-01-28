@@ -4,6 +4,7 @@ import api from "../api/axios.js";
 import InputField from "../components/common/InputField.jsx";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 export default function Signup() {
   const [formData, setFormData] = useState({
     username: "",
@@ -50,12 +51,12 @@ export default function Signup() {
       });
 
       setUploadProgress("");
-      alert("Account created successfully!");
+      toast.success("Account created successfully!");
       // Redirect to login page after successful registration
       navigate("/login", { replace: true });
     } catch (err) {
       const msg = err?.response?.data?.message || err.message || "Signup failed";
-      alert(msg);
+      toast.error(msg);
       setUploadProgress("");
     } finally {
       setLoading(false);

@@ -1,218 +1,112 @@
-import { Film, Home, Plus, Search, User, Bell, LogOut } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import { FaSearch } from "react-icons/fa";
-import api from "../../api/axios.js";
+import { Search, LogOut, Bell } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import Notification from "./Notification";
 import { userAuth } from "../../context/AuthContext.jsx";
 
-export function Navbar({ onNotificationClick }) {
-  const { pathname } = useLocation();
-
+export function Navbar() {
   const { user, token, logout } = userAuth();
   const isAuthed = Boolean(token);
-  const avatar = user?.profilePicture || "https://via.placeholder.com/32";
-  const profileLink = isAuthed ? "/profile" : "/login";
+  const avatar = user?.profilePicture || "/user.png";
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // Notifications (backend)
-  const [openNotif, setOpenNotif] = useState(false);
-  const [loadingNotif, setLoadingNotif] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setLoadingNotif(true);
-      const { data } = await api.get("/notification");
-      const list = Array.isArray(data?.notifications) ? data.notifications : [];
-      setNotifications(list);
-    } catch (e) {
-      setNotifications([]);
-    } finally {
-      setLoadingNotif(false);
-    }
-  }, []);
-
-  const removeNotification = async (id) => {
-    try {
-      await api.delete(`/notification/${id}`);
-      await fetchNotifications();
-    } catch { }
-  };
-
-  const clearAll = async () => {
-    try {
-      await Promise.all((notifications || []).map((n) => api.delete(`/notification/${n._id}`)));
-      await fetchNotifications();
-    } catch { }
-  };
-
-  const markAllRead = async () => {
-    try {
-      const unread = (notifications || []).filter((n) => !n.read);
-      await Promise.all(unread.map((n) => api.put(`/notification/${n._id}/read`)));
-      await fetchNotifications();
-    } catch { }
-  };
-
-  useEffect(() => {
-    if (!token) return;
-    fetchNotifications();
-  }, [token, fetchNotifications]);
-
-  useEffect(() => {
-    if (!token) return;
-    const id = setInterval(() => {
-      if (!openNotif) fetchNotifications();
-    }, 30000);
-    return () => clearInterval(id);
-  }, [token, openNotif, fetchNotifications]);
-
-  useEffect(() => {
-    if (openNotif) {
-      markAllRead();
-    }
-  }, [openNotif]);
-
-  const hasAny = (notifications || []).length > 0;
-  const hasUnread = (notifications || []).some((n) => !n.read);
+  // Optional: Add scroll effect
+  // useEffect(() => {
+  //   const handleScroll = () => setIsScrolled(window.scrollY > 10);
+  //   window.addEventListener('scroll', handleScroll);
+  //   return () => window.removeEventListener('scroll', handleScroll);
+  // }, []);
 
   return (
-    <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-2xl border-b border-gray-200/60 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-        {/* Logo */}
-        <Link
-          to="/"
-          className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent hover:scale-105 transition-transform"
-        >
-          Vibe
-        </Link>
-
-        {/* Search Button - Desktop */}
-        <Link
-          to="/search"
-          className="hidden w-[400px] md:flex items-center gap-2 bg-gradient-to-r from-gray-50 to-purple-50/30 hover:from-purple-50 hover:to-pink-50 rounded-full px-5 py-2.5 border border-gray-200/50 hover:border-purple-300 transition-all group"
-        >
-          <Search 
-            size={18} 
-            className="text-gray-500 group-hover:text-purple-600 transition-colors" 
-          />
-          <span className="text-sm text-gray-500 group-hover:text-purple-600 transition-colors">
-            Search for people, posts, and more
-
-
-          </span>
-        </Link>
-
-        {/* Right Section */}
-        <div className="flex items-center gap-2">
-          {/* Search Icon - Mobile */}
-          <Link
-            to="/search"
-            className="md:hidden p-2.5 hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 rounded-full transition-all hover:scale-105 active:scale-95 group"
+    <nav className={`sticky top-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'bg-white/80 backdrop-blur-xl shadow-sm' : 'bg-white'
+    } border-b border-gray-100`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link 
+            to="/" 
+            className="group flex items-center gap-2 transition-transform hover:scale-105"
           >
-            <Search size={22} className="text-gray-700 group-hover:text-purple-600 transition-colors" />
+            <div className="relative">
+              <div className="absolute inset-0 rounded-lg blur-sm opacity-75 group-hover:opacity-100 transition-opacity"></div>
+              <span className="relative block text-2xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent px-3 py-1">
+                Vibe
+              </span>
+            </div>
           </Link>
 
-          {/* Notification Button */}
-          <div className="relative">
-            <button
-              onClick={() => setOpenNotif((v) => !v)}
-              className="relative p-2.5 hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 rounded-full transition-all hover:scale-105 active:scale-95 group"
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            {/* Search Button */}
+            <Link 
+              to="/search" 
+              className="p-2.5 rounded-full hover:bg-gray-100 transition-all duration-200 group relative"
+              aria-label="Search"
             >
-              <Bell size={22} className="text-gray-700 group-hover:text-purple-600 transition-colors" />
-              {hasUnread && (
-                <div className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-pulse shadow-lg" />
-              )}
-            </button>
+              <Search 
+                size={20} 
+                className="text-gray-600 group-hover:text-purple-600 transition-colors" 
+              />
+              <span className="absolute inset-0 rounded-full bg-purple-100 scale-0 group-hover:scale-100 transition-transform duration-200 -z-10"></span>
+            </Link>
 
-            {openNotif && (
-              <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-auto bg-white border border-gray-200 rounded-xl shadow-xl z-50">
-                <div className="flex items-center justify-between px-4 py-2 border-b">
-                  <span className="text-sm font-semibold">Notifications</span>
-                  {hasAny && (
-                    <div className="flex items-center gap-3">
-                      <button onClick={clearAll} className="text-xs text-red-600 hover:underline">Clear all</button>
-                    </div>
-                  )}
-                </div>
-                <div className="divide-y">
-                  {loadingNotif ? (
-                    <div className="p-4 text-sm text-gray-500">Loading...</div>
-                  ) : notifications.length === 0 ? (
-                    <div className="p-4 text-sm text-gray-500">No notifications</div>
-                  ) : (
-                    notifications.map((n) => {
-                      const from = n?.fromUser?.username || "Someone";
-                      const kind = n?.type;
-                      const msg = kind === "follow"
-                        ? `${from} started following you`
-                        : kind === "like"
-                          ? `${from} liked your post`
-                          : kind === "comment"
-                            ? `${from} commented on your post`
-                            : kind === "post"
-                              ? `${from} posted new content`
-                              : `${from} has an update`;
-                      return (
-                        <div key={n._id} className="px-4 py-3 flex items-start gap-3 hover:bg-gray-50">
-                          <img src={n?.fromUser?.profilePicture || "https://via.placeholder.com/32"} alt="from" className="w-7 h-7 rounded-full object-cover border" />
-                          <div className="flex-1">
-                            <div className="text-sm text-gray-800">{msg}</div>
-                            <div className="text-[11px] text-gray-400">{new Date(n.createdAt).toLocaleString()}</div>
-                          </div>
-                          <button onClick={() => removeNotification(n._id)} className="text-xs text-gray-500 hover:text-red-600">Remove</button>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+            {/* Notifications */}
+            {isAuthed && <Notification token={token} />}
+
+            {isAuthed ? (
+              <div className="flex items-center gap-3 ml-2">
+                {/* Profile */}
+                <Link 
+                  to="/profile" 
+                  className="group relative"
+                  aria-label="Profile"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+                  <img
+                    src={avatar}
+                    alt="Profile"
+                    className="relative w-9 h-9 rounded-full object-cover ring-2 ring-white group-hover:ring-purple-200 transition-all duration-200"
+                  />
+                </Link>
+
+                {/* Logout Button */}
+                <button 
+                  onClick={logout} 
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 transition-all duration-200 text-sm font-medium group"
+                >
+                  <LogOut 
+                    size={16} 
+                    className="group-hover:rotate-6 transition-transform duration-200" 
+                  />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 ml-2">
+                {/* Login Button */}
+                <Link 
+                  to="/login"
+                  className="px-4 py-2 rounded-full text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 text-sm font-medium"
+                >
+                  Login
+                </Link>
+
+                {/* Sign Up Button */}
+                <Link 
+                  to="/signup"
+                  className="relative px-5 py-2 rounded-full text-white font-medium text-sm overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_100%] group-hover:bg-[position:100%_0] transition-all duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-300"></div>
+                  <span className="relative">Sign Up</span>
+                </Link>
               </div>
             )}
           </div>
-
-          {isAuthed ? (
-            <>
-              {/* Profile Picture */}
-              <Link
-                to={profileLink}
-                className="relative group"
-              >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full opacity-0 group-hover:opacity-100 blur transition-opacity" />
-                <img
-                  src={avatar}
-                  alt="profile"
-                  className="relative w-9 h-9 rounded-full border-2 border-white shadow-md hover:scale-105 transition-transform object-cover"
-                />
-              </Link>
-
-              {/* Logout Button */}
-              <button
-                type="button"
-                onClick={logout}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 rounded-xl font-medium transition-all hover:scale-105 active:scale-95 shadow-sm"
-              >
-                <LogOut size={16} />
-                <span className="text-sm">Logout</span>
-              </button>
-            </>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                to="/login"
-                className="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
 

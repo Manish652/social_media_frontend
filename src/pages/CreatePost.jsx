@@ -3,7 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 import { getMediaType, uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-
+import Lottie from "lottie-react";
+import toast from "react-hot-toast";
+import runningCat from "../assets/animations/Running Cat.json";
+import PostUploadProgress from "./PostUploadProgress.jsx";
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
@@ -42,6 +45,8 @@ export default function CreatePost() {
         mediaType = getMediaType(media);
         setUploadProgress("Creating post...");
       }
+      toast.success("Posted successfully!");
+
       await api.post("/post/create", {
         caption,
         mediaUrl,
@@ -109,16 +114,9 @@ export default function CreatePost() {
           )}
 
           {/* Upload Progress */}
-          {uploadProgress && (
-            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
-              <img
-                src="/src/assets/animations/Spinner-3.gif"
-                alt="Loading"
-                className="w-8 h-8"
-              />
-              <span className="text-sm text-purple-700 font-medium">{uploadProgress}</span>
-            </div>
-          )}
+          <PostUploadProgress uploadProgress={uploadProgress} runningCat={runningCat} />
+  
+
 
           {/* Submit Button */}
           <button

@@ -4,6 +4,7 @@ import api from "../api/axios.js";
 import InputField from "../components/common/InputField.jsx";
 import { userAuth } from "../context/AuthContext.jsx";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 export default function Login() {
   const [formData, setFormData] = useState({
     email: "",
@@ -29,9 +30,10 @@ export default function Login() {
       }
       const from = location.state?.from?.pathname || "/";
       navigate(from, { replace: true });
+      toast.success("Logged in successfully!");
     } catch (err) {
       const msg = err?.response?.data?.message || err.message || "Login failed";
-      alert(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

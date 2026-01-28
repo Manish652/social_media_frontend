@@ -1,4 +1,4 @@
-import { Bookmark, Film, Grid, Menu, Pencil, PlusCircle, Settings, Trash2 } from "lucide-react";
+import { Bookmark, Film, Grid, Menu, Pencil, PlusCircle, BookHeart, Trash2, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
@@ -7,7 +7,7 @@ import Layout from "../components/layout/Layout.jsx";
 import PostCard from "../components/post/PostCard.jsx";
 import ReelCard from "../components/reel/ReelCard.jsx";
 import { userAuth } from "../context/AuthContext";
-
+import toast from "react-hot-toast";
 export default function Profile() {
   const { user, login, logout } = userAuth();
   const [profile, setProfile] = useState({
@@ -20,16 +20,13 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [posts, setPosts] = useState([]);
   const [reels, setReels] = useState([]);
-  const [activeTab, setActiveTab] = useState("posts"); // "posts" or "reels"
+  const [activeTab, setActiveTab] = useState("posts");
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [preview, setPreview] = useState("");
-
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [followModalType, setFollowModalType] = useState("followers");
-
-
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -37,7 +34,6 @@ export default function Profile() {
         setLoading(true);
         const { data } = await api.get("/user/profile");
         setProfile(data);
-        // Always sync context user with fresh server data to keep followers/following accurate
         login(data, localStorage.getItem("token"));
       } catch (err) {
         console.log("Profile fetch failed:", err.message);
@@ -49,7 +45,6 @@ export default function Profile() {
     const fetchPosts = async () => {
       try {
         const { data } = await api.get("/post");
-        // Show all posts (including old video posts)
         setPosts(data?.posts || []);
       } catch (err) {
         console.log("Posts fetch failed:", err.message);
@@ -70,7 +65,6 @@ export default function Profile() {
     fetchReels();
   }, []);
 
-  // Keep profile followers/following in sync with context when viewing own profile
   useEffect(() => {
     if (!user?._id) return;
     setProfile((prev) => {
@@ -85,7 +79,6 @@ export default function Profile() {
     });
   }, [user?._id, Array.isArray(user?.followers) ? user.followers.length : 0, Array.isArray(user?.following) ? user.following.length : 0]);
 
-  // Also refetch fresh profile from server when your following length changes
   useEffect(() => {
     if (!user?._id) return;
     const fetchFresh = async () => {
@@ -104,7 +97,7 @@ export default function Profile() {
     try {
       const { data } = await api.get("/post");
       setPosts(data?.posts || []);
-    } catch { 
+    } catch {
       // Ignore errors
     }
   };
@@ -115,24 +108,25 @@ export default function Profile() {
       setDeleting(true);
       await api.delete(`/post/delete/${postId}`);
       await refreshPosts();
+      toast.success("Post deleted successfully!");
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to delete post");
+      toast.error(err?.response?.data?.message || "Failed to delete post");
     } finally {
       setDeleting(false);
     }
   };
 
   const handleDeleteReel = async (reelId) => {
+    if (!confirm("Delete this reel?")) return;
     try {
       setDeleting(true);
       await api.delete(`/reel/delete/${reelId}`);
-      // Refresh both reels and posts
       const { data: reelsData } = await api.get("/reel/all");
       setReels(reelsData?.reels || []);
       await refreshPosts();
-      alert("Reel deleted successfully!");
+      toast.success("Reel deleted successfully!");
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to delete reel");
+      toast.error(err?.response?.data?.message || "Failed to delete reel");
     } finally {
       setDeleting(false);
     }
@@ -146,8 +140,9 @@ export default function Profile() {
       setUpdating(true);
       await api.put(`/post/update/${post._id}`, { caption });
       await refreshPosts();
+      toast.success("Post updated successfully!");
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to update post");
+      toast.error(err?.response?.data?.message || "Failed to update post");
     } finally {
       setUpdating(false);
     }
@@ -162,21 +157,18 @@ export default function Profile() {
       setSaving(true);
       let profilePictureUrl = null;
 
-      // Upload profile picture directly to Cloudinary (bypasses server network)
       if (profileImageFile) {
         const { uploadToCloudinary } = await import("../utils/cloudinaryUpload.js");
         const result = await uploadToCloudinary(profileImageFile, "user_profiles");
         profilePictureUrl = result.url;
       }
 
-      // Send profile data to backend (only URL, not file)
       const { data } = await api.put("/user/editProfile", {
         username: profile.username || "",
         bio: profile.bio || "",
         profilePictureUrl: profilePictureUrl,
       });
 
-      // Update local state with new data
       const updatedProfile = {
         ...profile,
         ...data,
@@ -185,15 +177,15 @@ export default function Profile() {
 
       setProfile(updatedProfile);
       login(updatedProfile, localStorage.getItem("token"));
-      alert("Profile updated!");
+      toast.success("Profile updated!");
+
       setProfileImageFile(null);
       setPreview("");
 
-      // Force page reload to show new image
       window.location.reload();
     } catch (err) {
       console.error("Profile update error:", err);
-      alert(err.response?.data?.message || "Failed to update profile");
+      toast.error(err.response?.data?.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -201,9 +193,23 @@ export default function Profile() {
 
   if (loading) return <div className="max-w-2xl mx-auto p-6"><Layout /></div>;
 
+  const followersArr = Array.isArray(user?.followers) ? user.followers : (Array.isArray(profile.followers) ? profile.followers : []);
+  const followingArr = Array.isArray(user?.following) ? user.following : (Array.isArray(profile.following) ? profile.following : []);
+
+  const myPosts = posts.filter((p) => {
+    const uid = p?.userId?._id || p?.userId || p?.userID?._id || p?.userID;
+    const me = profile?._id || user?._id;
+    return uid && me && String(uid) === String(me);
+  });
+
+  const myReels = reels.filter((r) => {
+    const uid = r?.userId?._id || r?.userId;
+    const me = profile?._id || user?._id;
+    return uid && me && String(uid) === String(me);
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 pb-24">
-      {/* Follow List Modal */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
       <FollowListModal
         isOpen={showFollowModal}
         onClose={() => setShowFollowModal(false)}
@@ -212,294 +218,315 @@ export default function Profile() {
         currentUserId={user?._id}
       />
 
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-2xl border-b border-gray-200/60 shadow-sm">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            {profile.username || "Username"}
-          </h2>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/create-story"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow hover:shadow-md transition-all hover:scale-105 active:scale-95"
-            >
-              <PlusCircle size={18} />
-              <span className="text-xs font-semibold">Story</span>
-            </Link>
-            <button className="p-2.5 hover:bg-gray-100 rounded-full transition-all hover:scale-105 active:scale-95">
-              <Settings size={22} className="text-gray-700" />
-            </button>
-            <button className="p-2.5 hover:bg-gray-100 rounded-full transition-all hover:scale-105 active:scale-95">
-              <Menu size={22} className="text-gray-700" />
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Decorative background elements */}
+   
 
-      <div className="max-w-2xl mx-auto px-4">
-        {/* Profile info */}
-        <div className="mt-6 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
-          <div className="flex items-start gap-5">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full opacity-75 group-hover:opacity-100 blur transition-opacity"></div>
-              <img
-                src={preview || profile.profilePicture || "https://via.placeholder.com/96"}
-                alt="avatar"
-                className="relative w-24 h-24 rounded-full border-4 border-white object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900">{profile.username}</h2>
-              <p className="text-gray-500 text-sm mt-1">{profile.email}</p>
-              {profile.bio && (
-                <div className="mt-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-100">
-                  <p className="text-gray-700 text-sm leading-relaxed">{profile.bio}</p>
+      <div className="relative max-w-2xl mx-auto px-4 py-6">
+        {/* Profile Header Card */}
+        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-white/50 overflow-hidden">
+          {/* Top Section with Avatar and Quick Actions */}
+          <div className="p-8">
+            <div className="flex items-start gap-6">
+              {/* Avatar */}
+              <div className="relative flex-shrink-0 group">
+                <img
+                  src={preview || profile.profilePicture || "/user.png"}
+                  alt="avatar"
+                  className="relative w-28 h-28 rounded-full border-4 border-white object-cover shadow-xl"
+                />
+              </div>
+
+              {/* Profile Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-2xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent truncate">
+                      {profile.username}
+                    </h1>
+                    <p className="text-gray-500 text-sm truncate">{profile.email}</p>
+                  </div>
+                  
+                  {/* Create Story Button */}
+                  <Link
+                    to="/create-story"
+                    className="flex-shrink-0 group relative px-4 py-2.5 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400"></div>
+                    <span className="relative flex items-center gap-2 text-white font-bold text-sm">
+                      <BookHeart size={16} strokeWidth={2}/>
+                     Create Story
+                    </span>
+                  </Link>
                 </div>
-              )}
-              <div className="flex items-center gap-4 mt-5">
-                {(() => {
-                  const isMe = user?._id && (!profile?._id || String(user._id) === String(profile._id));
-                  const followersArr = isMe && Array.isArray(user?.followers) ? user.followers : (Array.isArray(profile.followers) ? profile.followers : []);
-                  const followingArr = isMe && Array.isArray(user?.following) ? user.following : (Array.isArray(profile.following) ? profile.following : []);
-                  return (
-                    <>
-                      <button
-                        onClick={() => {
-                          setFollowModalType("followers");
-                          setShowFollowModal(true);
-                        }}
-                        className="text-center hover:bg-purple-50 px-3 py-2 rounded-lg transition-colors"
-                      >
-                        <div className="text-xl font-bold text-gray-900">{followersArr.length}</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">Followers</div>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setFollowModalType("following");
-                          setShowFollowModal(true);
-                        }}
-                        className="text-center hover:bg-purple-50 px-3 py-2 rounded-lg transition-colors"
-                      >
-                        <div className="text-xl font-bold text-gray-900">{followingArr.length}</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">Following</div>
-                      </button>
-                    </>
-                  );
-                })()}
+
+                {/* Bio */}
+                {profile.bio && (
+                  <div className="mb-4 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-xl p-3 border border-purple-100/50">
+                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">{profile.bio}</p>
+                  </div>
+                )}
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      setFollowModalType("followers");
+                      setShowFollowModal(true);
+                    }}
+                    className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-3 hover:from-purple-100 hover:to-purple-200/50 transition-all"
+                  >
+                    <div className="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {followersArr.length}
+                    </div>
+                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">
+                      Followers
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setFollowModalType("following");
+                      setShowFollowModal(true);
+                    }}
+                    className="bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-xl p-3 hover:from-pink-100 hover:to-pink-200/50 transition-all"
+                  >
+                    <div className="text-2xl font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">
+                      {followingArr.length}
+                    </div>
+                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">
+                      Following
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Edit Profile Form */}
+          <form onSubmit={handleSave} className="border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white p-6 space-y-4">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Edit Profile</h3>
+            
+            {/* Profile Picture Upload */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Profile Picture</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    setProfileImageFile(f);
+                    try {
+                      setPreview(URL.createObjectURL(f));
+                    } catch {
+                      setPreview("");
+                    }
+                  }
+                }}
+                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 file:cursor-pointer cursor-pointer"
+              />
+            </div>
+
+            {/* Username */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+              <input
+                name="username"
+                value={profile.username}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                placeholder="Enter your username"
+              />
+            </div>
+
+            {/* Bio */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
+              <textarea
+                name="bio"
+                value={profile.bio}
+                onChange={handleChange}
+                rows="3"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none"
+                placeholder="Tell us about yourself..."
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <button
+                type="submit"
+                disabled={saving}
+                className="relative px-5 py-2.5 rounded-xl font-bold text-white overflow-hidden shadow-lg hover:shadow-xl disabled:opacity-60 transition-all group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span className="relative text-sm">{saving ? "Saving..." : "Save"}</span>
+              </button>
+
+              <Link
+                to="/create-post"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold shadow-lg hover:shadow-xl transition-all text-center text-sm"
+              >
+                New Post
+              </Link>
+
+              <button
+                type="button"
+                onClick={logout}
+                className="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold transition-all text-sm"
+              >
+                Logout
+              </button>
+            </div>
+          </form>
         </div>
-        <form onSubmit={handleSave} className="mt-4 space-y-4 bg-white shadow-lg rounded-2xl border border-gray-100 p-6 hover:shadow-xl transition-shadow">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Edit Profile</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Profile picture</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) {
-                  setProfileImageFile(f);
-                  try { setPreview(URL.createObjectURL(f)); } catch { }
-                }
-              }}
-              className="w-full text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
-            <input
-              name="username"
-              value={profile.username}
-              onChange={handleChange}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none"
-              placeholder="Enter your username"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
-            <textarea
-              name="bio"
-              value={profile.bio}
-              onChange={handleChange}
-              rows="3"
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none resize-none"
-              placeholder="Tell us about yourself..."
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 min-w-[120px] bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl disabled:opacity-60 transition-all hover:scale-[1.02] active:scale-95"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-            <Link
-              to="/create-post"
-              className="flex-1 min-w-[120px] bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-center"
-            >
-              Create Post
-            </Link>
-            <button
-              type="button"
-              onClick={logout}
-              className="flex-1 min-w-[120px] bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-[1.02] active:scale-95"
-            >
-              Logout
-            </button>
-          </div>
-        </form>
 
         {/* Tabs */}
-        <div className="mt-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="flex">
+        <div className="mt-6 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden">
+          <div className="grid grid-cols-3">
             <button
               onClick={() => setActiveTab("posts")}
-              className={`flex-1 py-4 flex items-center justify-center gap-2 border-b-4 transition-all ${activeTab === "posts"
-                ? "border-purple-500 text-purple-600 font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                }`}
+              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${
+                activeTab === "posts" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+              }`}
             >
-              <Grid size={22} />
+              {activeTab === "posts" && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
+              )}
+              <Grid size={20} strokeWidth={2.5} />
               <span className="hidden sm:inline">Posts</span>
             </button>
+
             <button
               onClick={() => setActiveTab("reels")}
-              className={`flex-1 py-4 flex items-center justify-center gap-2 border-b-4 transition-all ${activeTab === "reels"
-                ? "border-purple-500 text-purple-600 font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                }`}
+              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${
+                activeTab === "reels" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+              }`}
             >
-              <Film size={22} />
+              {activeTab === "reels" && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
+              )}
+              <Film size={20} strokeWidth={2.5} />
               <span className="hidden sm:inline">Reels</span>
             </button>
+
             <button
               onClick={() => setActiveTab("saved")}
-              className={`flex-1 py-4 flex items-center justify-center gap-2 border-b-4 transition-all ${activeTab === "saved"
-                ? "border-purple-500 text-purple-600 font-semibold"
-                : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                }`}
+              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${
+                activeTab === "saved" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+              }`}
             >
-              <Bookmark size={22} />
+              {activeTab === "saved" && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
+              )}
+              <Bookmark size={20} strokeWidth={2.5} />
               <span className="hidden sm:inline">Saved</span>
             </button>
           </div>
         </div>
 
-        {/* User posts */}
-        {activeTab === "posts" && (
-          <div className="mt-6 space-y-4">
-            {posts
-              .filter((p) => {
-                const uid = p?.userId?._id || p?.userId || p?.userID?._id || p?.userID;
-                const me = profile?._id || user?._id;
-                return uid && me && String(uid) === String(me);
-              })
-              .map((post) => {
-                const isOwner = String((post?.userId?._id || post?.userId || post?.userID?._id || post?.userID)) === String(profile?._id || user?._id);
-                return (
-                  <div key={post._id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
-                    <PostCard post={post} isLiked={false} isSaved={false} onLike={() => { }} onSave={() => { }} />
-                    {isOwner && (
-                      <div className="flex gap-3 px-5 py-3 bg-gradient-to-r from-gray-50 to-purple-50/30 border-t border-gray-100">
-                        <button
-                          onClick={() => handleUpdatePost(post)}
-                          disabled={updating}
-                          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors"
-                        >
-                          <Pencil size={16} /> Edit Post
-                        </button>
-                        <button
-                          onClick={() => handleDeletePost(post._id)}
-                          disabled={deleting}
-                          className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-semibold hover:underline transition-colors"
-                        >
-                          <Trash2 size={16} /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            {posts.filter((p) => {
-              const uid = p?.userId?._id || p?.userId || p?.userID?._id || p?.userID;
-              const me = profile?._id || user?._id;
-              return uid && me && String(uid) === String(me);
-            }).length === 0 && (
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
+        {/* Content Area */}
+        <div className="mt-6 space-y-4">
+          {/* Posts Tab */}
+          {activeTab === "posts" && (
+            <>
+              {myPosts.length === 0 ? (
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-16 text-center">
                   <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Grid size={32} className="text-purple-600" />
+                    <Grid size={32} className="text-purple-600" strokeWidth={2} />
                   </div>
-                  <p className="text-gray-500 font-medium">No posts yet</p>
+                  <p className="text-gray-600 font-semibold text-lg">No posts yet</p>
                   <p className="text-gray-400 text-sm mt-1">Start sharing your moments!</p>
+                  <Link
+                    to="/create-post"
+                    className="inline-block mt-4 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all text-sm"
+                  >
+                    Create Your First Post
+                  </Link>
+                </div>
+              ) : (
+                myPosts.map((post) => {
+                  const isOwner = String(post?.userId?._id || post?.userId || post?.userID?._id || post?.userID) === String(profile?._id || user?._id);
+                  return (
+                    <div
+                      key={post._id}
+                      className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden"
+                    >
+                      <PostCard post={post} isLiked={false} isSaved={false} onLike={() => {}} onSave={() => {}} />
+                      {isOwner && (
+                        <div className="flex gap-4 px-6 py-3 bg-gradient-to-r from-gray-50/80 to-purple-50/30 border-t border-gray-100">
+                          <button
+                            onClick={() => handleUpdatePost(post)}
+                            disabled={updating}
+                            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-semibold transition-colors disabled:opacity-50"
+                          >
+                            <Pencil size={16} /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeletePost(post._id)}
+                            disabled={deleting}
+                            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-semibold transition-colors disabled:opacity-50"
+                          >
+                            <Trash2 size={16} /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </>
+          )}
+
+          {/* Reels Tab */}
+          {activeTab === "reels" && (
+            <>
+              {myReels.length === 0 ? (
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-16 text-center">
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Film size={32} className="text-purple-600" strokeWidth={2} />
+                  </div>
+                  <p className="text-gray-600 font-semibold text-lg">No reels yet</p>
+                  <p className="text-gray-400 text-sm mt-1">Create your first reel!</p>
+                  <Link
+                    to="/create-reel"
+                    className="inline-block mt-4 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all text-sm"
+                  >
+                    Create Your First Reel
+                  </Link>
+                </div>
+              ) : (
+                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 p-4">
+                  <div className="grid grid-cols-3 gap-2">
+                    {myReels.map((reel) => (
+                      <ReelCard
+                        key={reel._id}
+                        reel={reel}
+                        showDelete={true}
+                        onDelete={handleDeleteReel}
+                        onClick={() => {
+                          window.location.href = `/reels`;
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
-          </div>
-        )}
+            </>
+          )}
 
-        {/* User reels */}
-        {activeTab === "reels" && (
-          <div className="mt-6">
-            {reels.filter((r) => {
-              const uid = r?.userId?._id || r?.userId;
-              const me = profile?._id || user?._id;
-              return uid && me && String(uid) === String(me);
-            }).length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
-                {reels
-                  .filter((r) => {
-                    const uid = r?.userId?._id || r?.userId;
-                    const me = profile?._id || user?._id;
-                    return uid && me && String(uid) === String(me);
-                  })
-                  .map((reel) => (
-                    <ReelCard
-                      key={reel._id}
-                      reel={reel}
-                      showDelete={true}
-                      onDelete={handleDeleteReel}
-                      onClick={() => {
-                        // Navigate to reels page with this reel
-                        window.location.href = `/reels`;
-                      }}
-                    />
-                  ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Film size={32} className="text-purple-600" />
-                </div>
-                <p className="text-gray-500 font-medium">No reels yet</p>
-                <p className="text-gray-400 text-sm mt-1">Create your first reel!</p>
-                <Link
-                  to="/create-reel"
-                  className="inline-block mt-4 px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-semibold hover:shadow-lg transition-all"
-                >
-                  Create Reel
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Saved posts */}
-        {activeTab === "saved" && (
-          <div className="mt-6">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
+          {/* Saved Tab */}
+          {activeTab === "saved" && (
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-16 text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Bookmark size={32} className="text-purple-600" />
+                <Bookmark size={32} className="text-purple-600" strokeWidth={2} />
               </div>
-              <p className="text-gray-500 font-medium">No saved posts yet</p>
+              <p className="text-gray-600 font-semibold text-lg">No saved posts yet</p>
               <p className="text-gray-400 text-sm mt-1">Save posts to see them here!</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

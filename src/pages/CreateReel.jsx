@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 import { userAuth } from "../context/AuthContext.jsx";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-
+import Lottie from "lottie-react";
+import runningCat from "../assets/animations/Running Cat.json";
+import PostUploadProgress from "./PostUploadProgress.jsx";
 export default function CreateReel() {
   const { user } = userAuth();
   const navigate = useNavigate();
@@ -34,7 +36,7 @@ export default function CreateReel() {
     try {
       setLoading(true);
 
-      setUploadProgress("Uploading video to Cloudinary...");
+      setUploadProgress("Uploading reel...");
       const result = await uploadToCloudinary(video, "reels_uploads");
       const videoUrl = result.url;
 
@@ -116,16 +118,9 @@ export default function CreateReel() {
           </div>
 
           {/* Upload Progress */}
-          {uploadProgress && (
-            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
-              <img
-                src="/src/assets/animations/Spinner-3.gif"
-                alt="Loading"
-                className="w-8 h-8"
-              />
-              <span className="text-sm text-purple-700 font-medium">{uploadProgress}</span>
-            </div>
-          )}
+
+          <PostUploadProgress uploadProgress={uploadProgress} runningCat={runningCat} />
+
 
           {/* Error */}
           {err && (
