@@ -45,7 +45,7 @@ VITE_API_BASE_URL=your_backend_api_url
 ---
 🧪 Run Locally
 # clone repository
-git clone https://github.com/your-username/project-frontend.git
+git clone  https://github.com/Manish652/social_media_frontend.git
 
 # install dependencies
 npm install
@@ -58,7 +58,7 @@ npm run dev
 
 Manish Bhunia
 
-#  GitHub: https://github.com/Manish652/
+# GitHub: https://github.com/Manish652/
 
 # LinkedIn: https://www.linkedin.com/in/manish-bhunia-99637a28b/
 
