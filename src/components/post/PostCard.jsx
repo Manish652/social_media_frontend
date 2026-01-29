@@ -66,6 +66,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
       await fetchComments();
     }
   };
+  
   // after add comment ir shou automaticaly refress 
   const addComment = async (e) => {
     e.preventDefault();

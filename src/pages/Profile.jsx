@@ -8,6 +8,7 @@ import PostCard from "../components/post/PostCard.jsx";
 import ReelCard from "../components/reel/ReelCard.jsx";
 import { userAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import EditPostModal from "../components/post/EditPostModal.jsx";
 export default function Profile() {
   const { user, login, logout } = userAuth();
   const [profile, setProfile] = useState({
@@ -27,6 +28,8 @@ export default function Profile() {
   const [preview, setPreview] = useState("");
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [followModalType, setFollowModalType] = useState("followers");
+    const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -131,18 +134,19 @@ export default function Profile() {
       setDeleting(false);
     }
   };
+    const handleUpdatePost = (post) => {
+    setEditingPost(post);
+    setShowEditModal(true);
+  };
 
-  const handleUpdatePost = async (post) => {
-    const current = post?.caption || "";
-    const caption = prompt("Edit caption", current);
-    if (caption == null) return;
+  const handleSavePostEdit = async (caption) => {
     try {
       setUpdating(true);
-      await api.put(`/post/update/${post._id}`, { caption });
+      await api.put(`/post/update/${editingPost._id}`, { caption });
       await refreshPosts();
-      toast.success("Post updated successfully!");
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to update post");
+      alert(err?.response?.data?.message || "Failed to update post");
+      throw err;
     } finally {
       setUpdating(false);
     }
@@ -218,6 +222,15 @@ export default function Profile() {
         currentUserId={user?._id}
       />
 
+        <EditPostModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingPost(null);
+        }}
+        post={editingPost}
+        onSave={handleSavePostEdit}
+      />
       {/* Decorative background elements */}
 
 
@@ -278,7 +291,7 @@ export default function Profile() {
                 {/* Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-                <button
+                  <button
                     onClick={() => {
                       setFollowModalType("followers");
                       setShowFollowModal(true);
