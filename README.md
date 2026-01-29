@@ -1,16 +1,63 @@
-# React + Vite
+# Social Media Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for VibeMedia, a responsive Social media  web application built to consume a
+REST API and demonstrate modern React development practices.
 
-Currently, two official plugins are available:
+> ⚠️ This backend was deployed using a trial/free hosting environment.
+> The live demo may be offline outside the trial period.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🔗 Related Repositories
+- **Frontend:** https://github.com/Manish652/social_media_frontend
+- **Backend API:** https://github.com/Manish652/social_media_backend
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🌐 Live Demo
+- URL: vibeforlife.vercel.app
+- Status: *May be offline if trial period has ended*
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## ✨ Features
+- Responsive UI
+- API integration with backend
+- Authentication flow (login / signup)
+- Protected routes
+- State management
+- Error & loading states
+
+---
+
+## 🛠 Tech Stack
+- **Framework:** React
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS
+- **HTTP Client:** Axios 
+- **Routing:** React Router
+- **Deployment:** Vercel 
+
+---
+
+VITE_API_BASE_URL=your_backend_api_url
+
+---
+🧪 Run Locally
+# clone repository
+git clone https://github.com/your-username/project-frontend.git
+
+# install dependencies
+npm install
+
+# start dev server
+npm run dev
+
+---
+👤 Author
+
+Manish Bhunia
+#  GitHub: https://github.com/Manish652/
+
+# LinkedIn: https://www.linkedin.com/in/manish-bhunia-99637a28b/
+
