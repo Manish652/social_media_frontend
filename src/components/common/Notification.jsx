@@ -229,6 +229,7 @@ export default function Notification({ token }) {
                                 ? "liked your post"
                                 : n.type === "comment"
                                   ? "commented on your post"
+                                  
                                   : "has an update"}
                           </span>
                         </p>

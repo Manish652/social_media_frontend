@@ -1,17 +1,17 @@
-import { Image, Search as SearchIcon, TrendingUp, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Image, Search as SearchIcon, TrendingUp, Users, ArrowRight, Grid, Bookmark } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios.js";
 
 export default function Search() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("all"); // 'all', 'people', 'posts'
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
   const [randomPosts, setRandomPosts] = useState([]);
   const [error, setError] = useState("");
 
-  // Fetch random posts on mount
   useEffect(() => {
     fetchRandomPosts();
   }, []);
@@ -19,9 +19,8 @@ export default function Search() {
   const fetchRandomPosts = async () => {
     try {
       const { data } = await api.get("/post");
-      // Shuffle and take first 12 posts
       const shuffled = (data.posts || []).sort(() => 0.5 - Math.random());
-      setRandomPosts(shuffled.slice(0, 12));
+      setRandomPosts(shuffled.slice(0, 15));
     } catch (err) {
       console.error("Failed to fetch random posts:", err);
     }
@@ -29,244 +28,192 @@ export default function Search() {
 
   const onSearch = async (e) => {
     e?.preventDefault?.();
-    setError("");
-    setUsers([]);
-    setPosts([]);
     if (!q.trim()) return;
+    setError("");
+    setLoading(true);
     try {
-      setLoading(true);
       const { data } = await api.get("/search/search", { params: { query: q.trim() } });
       setUsers(Array.isArray(data?.userResult) ? data.userResult : []);
       setPosts(Array.isArray(data?.postResult) ? data.postResult : []);
     } catch (err) {
-      setError(err?.response?.data?.message || "Search failed");
+      setError("Something went wrong with the search.");
     } finally {
       setLoading(false);
     }
   };
 
-  const hasSearched = users.length > 0 || posts.length > 0 || error || loading;
+  const hasSearched = q.trim() !== "" && (users.length > 0 || posts.length > 0 || loading);
 
   return (
-    <div className="min-h-screen pb-28 bg-gradient-to-br from-gray-50 via-purple-50/20 to-pink-50/20">
-      <div className="max-w-2xl mx-auto px-4 pt-6">
-        {/* Search Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl mb-3">
-            <SearchIcon size={28} className="text-purple-600" />
-          </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Discover & Explore
+    <div className="min-h-screen pb-28 bg-[#fafafa]">
+      {/* Decorative Background Glows */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-purple-200/30 blur-[120px] rounded-full" />
+        <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-pink-200/20 blur-[100px] rounded-full" />
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 pt-10 relative z-10">
+        
+        {/* Header Section */}
+        <div className="flex flex-col items-center mb-10 animate-fadeInDown">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+            Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">Vibe</span>
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Search for people, posts, and more</p>
+          <p className="text-slate-500 mt-2 font-medium">Find your friends and inspiration</p>
         </div>
 
-        {/* Search bar */}
-        <form
-          onSubmit={onSearch}
-          className="relative bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden focus-within:ring-4 focus-within:ring-purple-100 transition-all hover:shadow-xl"
-        >
-          <div className="flex items-center gap-3 px-5 py-4">
-            <SearchIcon size={20} className="text-gray-400 flex-shrink-0" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search users or captions..."
-              className="flex-1 outline-none text-sm bg-transparent placeholder-gray-400"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl disabled:opacity-60 transition-all hover:scale-105 active:scale-95 disabled:hover:scale-100"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Searching
-                </span>
-              ) : (
-                "Search"
+        {/* Floating Search Bar */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <form
+            onSubmit={onSearch}
+            className="group relative bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white overflow-hidden focus-within:ring-4 focus-within:ring-purple-500/10 transition-all duration-500"
+          >
+            <div className="flex items-center gap-3 px-6 py-5">
+              <SearchIcon size={22} className="text-slate-400 group-focus-within:text-purple-500 transition-colors" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search usernames, names, or vibes..."
+                className="flex-1 outline-none text-lg bg-transparent placeholder-slate-400 text-slate-700 font-medium"
+              />
+              {q && (
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="bg-slate-900 text-white p-3 rounded-2xl hover:bg-purple-600 transition-all shadow-lg active:scale-90"
+                >
+                  <ArrowRight size={20} />
+                </button>
               )}
-            </button>
-          </div>
-        </form>
+            </div>
+          </form>
 
-        {/* Error */}
-        {error && (
-          <div className="mt-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 text-center">
-            {error}
+          {/* Quick Tags */}
+          {!hasSearched && (
+             <div className="flex flex-wrap justify-center gap-2 mt-6 animate-fadeInUp">
+                {['#photography', '#art', '#nature', '#travel'].map(tag => (
+                  <button key={tag} onClick={() => {setQ(tag); onSearch();}} className="px-4 py-1.5 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 hover:bg-purple-50 hover:text-purple-600 hover:border-purple-100 transition-all">
+                    {tag}
+                  </button>
+                ))}
+             </div>
+          )}
+        </div>
+
+        {/* Tab Switcher (Only visible after search) */}
+        {hasSearched && !loading && (
+          <div className="flex justify-center gap-4 mb-8">
+            {['all', 'people', 'posts'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-2 rounded-full text-sm font-bold capitalize transition-all ${
+                  activeTab === tab 
+                  ? 'bg-slate-900 text-white shadow-xl scale-105' 
+                  : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Explore Posts - Show when no search */}
-        {!hasSearched && randomPosts.length > 0 && (
-          <div className="mt-6">
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-lg overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
-                <div className="flex items-center gap-2">
-                  <TrendingUp size={20} className="text-purple-600" />
-                  <span className="font-semibold text-gray-800">Explore</span>
-                  <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
-                    Trending
-                  </span>
-                </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-purple-100 border-t-purple-600 rounded-full animate-spin mb-4" />
+            <p className="text-slate-500 font-bold animate-pulse">Searching the universe...</p>
+          </div>
+        )}
+
+        {/* Results / Explore Grid */}
+        <div className="space-y-12">
+          
+          {/* USERS SECTION */}
+          {(activeTab === 'all' || activeTab === 'people') && users.length > 0 && (
+            <section className="animate-fadeInUp">
+              <div className="flex items-center justify-between mb-4 px-2">
+                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <Users size={20} className="text-purple-500" /> People
+                </h3>
               </div>
-              <div className="grid grid-cols-3 gap-1 p-1">
-                {randomPosts.map((post) => (
-                  <Link
-                    key={post._id}
-                    to={`/post/${post._id}`}
-                    className="group relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {users.map(u => (
+                  <Link 
+                    key={u._id} 
+                    to={`/u/${u._id}`}
+                    className="flex items-center gap-4 p-4 bg-white/60 backdrop-blur-sm border border-white rounded-[1.5rem] hover:bg-white hover:shadow-xl hover:shadow-purple-500/5 transition-all group"
                   >
-                    {post.image ? (
-                      <img
-                        src={post.image}
-                        alt="post"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : post.video ? (
-                      <video
-                        className="w-full h-full object-cover bg-black group-hover:scale-110 transition-transform duration-300"
-                        src={post.video}
-                        muted
-                        loop
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200" />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 flex items-end transition-opacity duration-300">
-                      <p className="text-white text-xs font-medium p-3 line-clamp-2">
-                        {post.caption || "No caption"}
-                      </p>
+                    <img 
+                      src={u.profilePic || u.profilePicture || "/user.png"} 
+                      className="w-14 h-14 rounded-full object-cover ring-2 ring-purple-100 group-hover:ring-purple-400 transition-all"
+                    />
+                    <div className="flex-1">
+                      <p className="font-bold text-slate-800 tracking-tight">@{u.username}</p>
+                      <p className="text-xs text-slate-500 font-medium">{u.fullName || "Member"}</p>
+                    </div>
+                    <div className="p-2 bg-slate-50 rounded-xl text-slate-400 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                      <ArrowRight size={18} />
                     </div>
                   </Link>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
+            </section>
+          )}
 
-        {/* Results */}
-        {hasSearched && (
-          <div className="mt-6 space-y-6">
-            {/* Users */}
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
-                <div className="flex items-center gap-2">
-                  <Users size={20} className="text-purple-600" />
-                  <span className="font-semibold text-gray-800">People</span>
-                  {users.length > 0 && (
-                    <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
-                      {users.length}
-                    </span>
-                  )}
-                </div>
+          {/* POSTS SECTION (Grid) */}
+          {(activeTab === 'all' || activeTab === 'posts') && (
+            <section className="animate-fadeInUp delay-100">
+              <div className="flex items-center justify-between mb-6 px-2">
+                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  {hasSearched ? <Grid size={20} className="text-pink-500" /> : <TrendingUp size={20} className="text-pink-500" />}
+                  {hasSearched ? "Posts" : "Discover Vibes"}
+                </h3>
               </div>
-              {loading ? (
-                <div className="p-8 text-center">
-                  <div className="inline-block w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                  <p className="text-sm text-gray-500 mt-3">Searching for people...</p>
-                </div>
-              ) : users.length === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Users size={28} className="text-gray-400" />
-                  </div>
-                  <p className="text-sm text-gray-400">No users found</p>
-                </div>
-              ) : (
-                <ul>
-                  {users.map((u) => (
-                    <li
-                      key={u._id}
-                      className="p-4 flex items-center gap-4 border-b last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/30 hover:to-pink-50/30 transition-colors"
-                    >
-                      <div className="relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full opacity-0 group-hover:opacity-75 blur transition-opacity" />
-                        <img
-                          to={`/u/${u._id}`}
-                          src={u.profilePic || u.profilePicture || "https://via.placeholder.com/40"}
-                          alt={u.username}
-                          className="relative w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
-                        />
+              
+              <div className="columns-2 sm:columns-3 gap-4 space-y-4">
+                {(hasSearched ? posts : randomPosts).map((post) => (
+                  <Link
+                    key={post._id}
+                    to={`/post/${post._id}`}
+                    className="relative block break-inside-avoid rounded-3xl overflow-hidden group shadow-sm hover:shadow-2xl transition-all duration-500"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                    
+                    {post.image || post.mediaUrl ? (
+                      <img
+                        src={post.image || post.mediaUrl}
+                        alt="post"
+                        className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-40 bg-gradient-to-br from-purple-500 to-pink-500 p-6 flex items-center justify-center">
+                         <p className="text-white font-bold text-center italic">"{post.caption}"</p>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 truncate">{u.username}</p>
-                        <p className="text-xs text-gray-500 truncate">{u.fullName || u.email || ""}</p>
-                      </div>
-                      <Link
-                        to={`/u/${u._id}`}
-                        className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95"
-                      >
-                        View
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    )}
 
-            {/* Posts */}
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
-                <div className="flex items-center gap-2">
-                  <Image size={20} className="text-purple-600" />
-                  <span className="font-semibold text-gray-800">Posts</span>
-                  {posts.length > 0 && (
-                    <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
-                      {posts.length}
-                    </span>
-                  )}
-                </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all z-20">
+                       <p className="text-white text-xs font-bold line-clamp-1">{post.caption || "View Vibe"}</p>
+                       <div className="flex items-center gap-2 mt-2">
+                          <div className="w-5 h-5 rounded-full bg-white/20 backdrop-blur-md border border-white/30" />
+                          <span className="text-[10px] text-white/80 font-medium">@{post.user?.username || 'user'}</span>
+                       </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              {loading ? (
-                <div className="p-8 text-center">
-                  <div className="inline-block w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                  <p className="text-sm text-gray-500 mt-3">Searching for posts...</p>
-                </div>
-              ) : posts.length === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Image size={28} className="text-gray-400" />
-                  </div>
-                  <p className="text-sm text-gray-400">No posts found</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 p-1">
-                  {posts.map((p) => (
-                    <Link
-                      key={p._id}
-                      to={`/post/${p._id}`}
-                      className="group relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all"
-                    >
-                      {p.image ? (
-                        <img
-                          src={p.image}
-                          alt="post"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                      ) : p.video ? (
-                        <video
-                          className="w-full h-full object-cover bg-black group-hover:scale-110 transition-transform duration-300"
-                          src={p.video}
-                          muted
-                          loop
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200" />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 flex items-end transition-opacity duration-300">
-                        <p className="text-white text-xs font-medium p-3 line-clamp-2">
-                          {p.caption || "No caption"}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
+
+              {hasSearched && posts.length === 0 && !loading && (
+                <div className="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+                  <Bookmark className="mx-auto text-slate-200 mb-4" size={48} />
+                  <p className="text-slate-400 font-bold">No posts found for this vibe.</p>
                 </div>
               )}
-            </div>
-          </div>
-        )}
+            </section>
+          )}
+
+        </div>
       </div>
     </div>
   );

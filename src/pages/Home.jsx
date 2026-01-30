@@ -4,9 +4,11 @@ import Skaliton from "../components/layout/Skaliton.jsx";
 import PostCard from "../components/post/PostCard.jsx";
 import StoriesSection from "../components/story/StoriesSection.jsx";
 import { userAuth } from "../context/AuthContext.jsx";
-
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
+
   const [likedPosts, setLikedPosts] = useState(new Set());
   const [savedPosts, setSavedPosts] = useState(new Set());
   const [posts, setPosts] = useState([]);
@@ -111,6 +113,8 @@ export default function Home() {
                 isSaved={savedPosts.has(id)}
                 onLike={() => toggleLike(post)}
                 onSave={() => toggleSave(id)}
+                onMediaClick={() => navigate(`/post/${id}`)}
+
               />
             );
           })}

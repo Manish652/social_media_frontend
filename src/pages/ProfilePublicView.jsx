@@ -6,9 +6,12 @@ import api from "../api/axios.js";
 import FollowListModal from "../components/common/FollowListModal.jsx";
 import PostCard from "../components/post/PostCard.jsx";
 import { userAuth } from "../context/AuthContext.jsx";
-
+import { useNavigate } from "react-router-dom";
 export default function ProfilePublicView() {
+  
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const { user, updateFollowing } = userAuth();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -400,6 +403,8 @@ export default function ProfilePublicView() {
                           isSaved={false}
                           onLike={() => {}}
                           onSave={() => {}}
+                        onMediaClick={() => navigate(`/post/${post._id}`)}
+
                         />
                       </div>
                     ))}

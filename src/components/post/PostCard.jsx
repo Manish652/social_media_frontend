@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { Bookmark, Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Bookmark, MoreHorizontal, Trash2 } from "lucide-react";
 import api from "../../api/axios.js";
 import { userAuth } from "../../context/AuthContext.jsx";
-import toast from "react-hot-toast";
 function formatTimeAgo(dateStr) {
   try {
     const d = new Date(dateStr);
@@ -17,12 +16,12 @@ function formatTimeAgo(dateStr) {
   }
 }
 
-export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
+export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMediaClick }) {
   const { user, updateFollowing } = userAuth();
   const populatedUser = post?.userId || post?.userID;
   const authorId = populatedUser?._id || populatedUser;
   const username = populatedUser?.username || post?.username || "User";
-  const avatar = populatedUser?.profilePicture || post?.avatar || "https://via.placeholder.com/40";
+  const avatar = populatedUser?.profilePicture || post?.avatar || "/user.png";
   const timeAgo = post?.createdAt ? formatTimeAgo(post.createdAt) : post?.timeAgo || "";
   const likesCount = Array.isArray(post?.likes) ? post.likes.length : post?.likes || 0;
   const mediaImage = post?.image;
@@ -66,30 +65,17 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
       await fetchComments();
     }
   };
-  
-  // after add comment ir shou automaticaly refress 
+
   const addComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
     try {
       const { data } = await api.post(`/comment/${postId}/comment`, { text: newComment.trim() });
       if (data?.comment) {
-        const populatedComment = {
-          ...data.comment,
-          user: {
-            _id: user._id,
-            username: user.username,
-            profilePicture: user.profilePicture,
-          },
-        };
-        setComments((prev) => [populatedComment, ...prev]);
-        setNewComment("");
+        setComments((prev) => [data.comment, ...prev]);
         setCommentCount((c) => c + 1);
-
       } else {
         await fetchComments();
-
-        //setCommentCount((c) => c + 1);
       }
       setNewComment("");
     } catch (err) {
@@ -115,7 +101,6 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
       await api.post(`/follow/${authorId}/follow`);
     } catch (e) {
       updateFollowing(authorId, "unfollow");
-      console.log(e);
     }
   };
 
@@ -125,12 +110,11 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
       await api.post(`/follow/${authorId}/unfollow`);
     } catch (e) {
       updateFollowing(authorId, "follow");
-      console.log(e);
     }
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 relativeoverflow-hidden hover:shadow-2xl transition-all duration-300">
+    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-white via-purple-50/20 to-pink-50/20">
         <div className="flex items-center gap-3">
@@ -177,7 +161,10 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
       </div>
 
       {/* Media */}
-      <div className="relative bg-gradient-to-br from-gray-50 to-purple-50/30">
+      <div
+        className="relative bg-gradient-to-br from-gray-50 to-purple-50/30 cursor-pointer"
+        onClick={onMediaClick}
+      >
         {mediaImage ? (
           <img src={mediaImage} alt="Post" className="w-full max-h-[550px] object-cover" />
         ) : mediaVideo ? (
@@ -193,8 +180,8 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
           <button
             onClick={onLike}
             className={`group relative p-2 rounded-xl transition-all ${isLiked
-                ? "bg-red-50 scale-110"
-                : "hover:bg-purple-50 hover:scale-105"
+              ? "bg-red-50 scale-110"
+              : "hover:bg-purple-50 hover:scale-105"
               }`}
           >
             <Heart
@@ -221,8 +208,8 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
         <button
           onClick={onSave}
           className={`group p-2 rounded-xl transition-all ${isSaved
-              ? "bg-yellow-50 scale-110"
-              : "hover:bg-purple-50 hover:scale-105"
+            ? "bg-yellow-50 scale-110"
+            : "hover:bg-purple-50 hover:scale-105"
             }`} >
           <Bookmark
             size={24}
@@ -290,7 +277,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave }) {
                     <div className="relative group">
                       <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-0 group-hover:opacity-100 blur transition-opacity" />
                       <img
-                        src={c.user?.profilePicture || "https://via.placeholder.com/32"}
+                        src={c.user?.profilePicture || "/user.png"}
                         alt={c.user?.username || "User"}
                         className="relative w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                       />

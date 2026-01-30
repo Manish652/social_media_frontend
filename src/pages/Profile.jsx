@@ -185,8 +185,6 @@ export default function Profile() {
 
       setProfileImageFile(null);
       setPreview("");
-
-      window.location.reload();
     } catch (err) {
       console.error("Profile update error:", err);
       toast.error(err.response?.data?.message || "Failed to update profile");
