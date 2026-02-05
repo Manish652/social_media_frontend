@@ -1,8 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_SOCKET_URL||"https://socialmediabackend-production-0a44.up.railway.app/api", {
-
-const socket = io(SOCKET_URL, {
+const socket = io(import.meta.env.VITE_SOCKET_URL || "https://socialmediabackend-production-0a44.up.railway.app", {
   withCredentials: true,
   autoConnect: false,
 });
