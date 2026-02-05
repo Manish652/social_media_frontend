@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const socket = io(import.meta.env.VITE_SOCKET_URL||"https://socialmediabackend-production-0a44.up.railway.app/api", {
 
 const socket = io(SOCKET_URL, {
   withCredentials: true,
