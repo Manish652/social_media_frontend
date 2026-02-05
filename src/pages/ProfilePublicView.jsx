@@ -1,14 +1,13 @@
+import { Bookmark, Film, Grid, MessageCircle, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Bookmark, Film, Grid, Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
-import ReelCard from "../components/reel/ReelCard.jsx";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios.js";
 import FollowListModal from "../components/common/FollowListModal.jsx";
 import PostCard from "../components/post/PostCard.jsx";
+import ReelCard from "../components/reel/ReelCard.jsx";
 import { userAuth } from "../context/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
 export default function ProfilePublicView() {
-  
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -180,7 +179,7 @@ export default function ProfilePublicView() {
         <div className="h-64 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 relative overflow-hidden">
           {/* Animated gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600/50 via-transparent to-pink-600/50 animate-gradient"></div>
-          
+
           {/* Decorative elements */}
           <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
@@ -196,7 +195,7 @@ export default function ProfilePublicView() {
               <div className="relative flex-shrink-0 group">
                 {/* Gradient ring animation */}
                 <div className="absolute -inset-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 rounded-full opacity-75 blur-lg group-hover:opacity-100 transition-opacity duration-500"></div>
-                
+
                 {/* Avatar container */}
                 <div className="relative">
                   <img
@@ -204,7 +203,7 @@ export default function ProfilePublicView() {
                     alt={profile.username}
                     className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white shadow-xl"
                   />
-                  
+
                   {/* Status badge */}
                   {!isMe && (
                     <button
@@ -213,11 +212,10 @@ export default function ProfilePublicView() {
                     >
                       <div className="relative">
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full blur-md opacity-75"></div>
-                        <div className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                          isFollowing 
-                            ? 'bg-white border-2 border-purple-300' 
-                            : 'bg-gradient-to-r from-purple-600 to-pink-500'
-                        }`}>
+                        <div className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${isFollowing
+                          ? 'bg-white border-2 border-purple-300'
+                          : 'bg-gradient-to-r from-purple-600 to-pink-500'
+                          }`}>
                           {isFollowing ? (
                             <span className="text-purple-600 text-xl font-bold">✓</span>
                           ) : (
@@ -243,7 +241,7 @@ export default function ProfilePublicView() {
 
                   {/* Action Button */}
                   {!isMe && (
-                    <div className="flex justify-center sm:justify-start">
+                    <div className="flex gap-3 justify-center sm:justify-start">
                       {!isFollowing ? (
                         <button
                           onClick={handleFollow}
@@ -264,6 +262,28 @@ export default function ProfilePublicView() {
                           Following
                         </button>
                       )}
+
+                      {/* Message Button */}
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { data } = await api.post("/chat/create", { userId: id });
+                            const chatId = data?._id || data?.chat?._id || data?.chatId;
+                            if (chatId) {
+                              navigate(`/messages?chatId=${chatId}`);
+                            } else {
+                              navigate(`/messages`);
+                            }
+                          } catch (err) {
+                            console.error("Failed to create chat:", err);
+                            alert(err?.response?.data?.message || "Failed to start chat");
+                          }
+                        }}
+                        className="px-6 py-3 rounded-full font-bold bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-md flex items-center gap-2"
+                      >
+                        <MessageCircle size={18} />
+                        Message
+                      </button>
                     </div>
                   )}
                 </div>
@@ -330,11 +350,10 @@ export default function ProfilePublicView() {
             <div className="grid grid-cols-3">
               <button
                 onClick={() => setActiveTab("posts")}
-                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${
-                  activeTab === "posts"
-                    ? "text-purple-600"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
+                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${activeTab === "posts"
+                  ? "text-purple-600"
+                  : "text-gray-400 hover:text-gray-600"
+                  }`}
               >
                 {activeTab === "posts" && (
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
@@ -345,11 +364,10 @@ export default function ProfilePublicView() {
 
               <button
                 onClick={() => setActiveTab("reels")}
-                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${
-                  activeTab === "reels"
-                    ? "text-purple-600"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
+                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${activeTab === "reels"
+                  ? "text-purple-600"
+                  : "text-gray-400 hover:text-gray-600"
+                  }`}
               >
                 {activeTab === "reels" && (
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
@@ -360,11 +378,10 @@ export default function ProfilePublicView() {
 
               <button
                 onClick={() => setActiveTab("saved")}
-                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${
-                  activeTab === "saved"
-                    ? "text-purple-600"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
+                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all duration-300 ${activeTab === "saved"
+                  ? "text-purple-600"
+                  : "text-gray-400 hover:text-gray-600"
+                  }`}
               >
                 {activeTab === "saved" && (
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
@@ -401,9 +418,9 @@ export default function ProfilePublicView() {
                           post={post}
                           isLiked={false}
                           isSaved={false}
-                          onLike={() => {}}
-                          onSave={() => {}}
-                        onMediaClick={() => navigate(`/post/${post._id}`)}
+                          onLike={() => { }}
+                          onSave={() => { }}
+                          onMediaClick={() => navigate(`/post/${post._id}`)}
 
                         />
                       </div>

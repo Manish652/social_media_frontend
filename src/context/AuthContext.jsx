@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         const parsed = JSON.parse(savedUser);
         const normalized = normalizeUserData(parsed);
         setUser(normalized);
-        try { localStorage.setItem("user", JSON.stringify(normalized)); } catch {}
+        try { localStorage.setItem("user", JSON.stringify(normalized)); } catch { }
       }
     } catch (err) {
       console.error("Failed to load auth data:", err);
@@ -56,6 +57,13 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    // Disconnect socket on logout
+    if (socket && socket.connected) {
+      console.log("[AuthContext] Disconnecting socket on logout");
+      socket.disconnect();
+    }
+
     toast.success("Logged out successfully!");
   };
 
@@ -72,7 +80,7 @@ export const AuthProvider = ({ children }) => {
       const next = { ...prev, following };
       try {
         localStorage.setItem("user", JSON.stringify(next));
-      } catch {}
+      } catch { }
       return next;
     });
   };

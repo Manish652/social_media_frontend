@@ -1,4 +1,4 @@
-import { Film, Home, Plus, Search, User } from "lucide-react";
+import { Film, Home, MessageCircle, Plus, Search, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { userAuth } from "../../context/AuthContext.jsx";
 
@@ -53,6 +53,10 @@ export default function BottomTab() {
 
         <Item to="/reels" active={pathname.startsWith("/reels")}>
           <Film size={24} strokeWidth={pathname.startsWith("/reels") ? 2.5 : 2} />
+        </Item>
+
+        <Item to="/messages" active={pathname.startsWith("/messages")}>
+          <MessageCircle size={24} strokeWidth={pathname.startsWith("/messages") ? 2.5 : 2} />
         </Item>
 
         {/* Create button with special styling */}
