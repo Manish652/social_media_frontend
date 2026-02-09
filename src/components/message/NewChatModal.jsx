@@ -108,7 +108,11 @@ export default function NewChatModal({ isOpen, onClose }) {
                 <>
                   <p className="text-4xl mb-3">👋</p>
                   <p className="font-medium">Search for someone</p>
+<<<<<<< HEAD
                   <p className="text-sm mt-1">Start typing to the find find users</p>
+=======
+                  <p className="text-sm mt-1">Start typing to find users</p>
+>>>>>>> 4bd4cdd5bb72c68fb8c5b04b6dc216d8ceb7235f
                 </>
               )}
             </div>
