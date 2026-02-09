@@ -34,20 +34,11 @@ export default function Search() {
     setPosts([]);
     if (!q.trim()) return;
     try {
-<<<<<<< HEAD
       const { data } = await api.get("/search/", { params: { query: q.trim() } });
       setUsers(Array.isArray(data?.userResult) ? data.userResult : []);
       setPosts(Array.isArray(data?.postResult) ? data.postResult : []);
     } catch  {
       setError("Something went wrong with the search.");
-=======
-      setLoading(true);
-      const { data } = await api.get("/search/", { params: { query: q.trim() } });
-      setUsers(Array.isArray(data?.userResult) ? data.userResult : []);
-      setPosts(Array.isArray(data?.postResult) ? data.postResult : []);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Search failed");
->>>>>>> 4bd4cdd5bb72c68fb8c5b04b6dc216d8ceb7235f
     } finally {
       setLoading(false);
     }

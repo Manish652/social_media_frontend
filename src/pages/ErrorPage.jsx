@@ -2,11 +2,6 @@ import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import { Home, ArrowLeft, RefreshCcw } from "lucide-react";
 
-<<<<<<< HEAD
-=======
-// You can use any 404 / Error Lottie JSON here
-// Suggestion: https://lottiefiles.com/animations/404-astronaut-Lp79Vf0vM9
->>>>>>> 4bd4cdd5bb72c68fb8c5b04b6dc216d8ceb7235f
 import errorAnimation from "../assets/animations/Error 404.json";
 
 export default function ErrorPage() {
