@@ -35,7 +35,7 @@ export default function Search() {
     if (!q.trim()) return;
     try {
       setLoading(true);
-      const { data } = await api.get("/search/search", { params: { query: q.trim() } });
+      const { data } = await api.get("/search/", { params: { query: q.trim() } });
       setUsers(Array.isArray(data?.userResult) ? data.userResult : []);
       setPosts(Array.isArray(data?.postResult) ? data.postResult : []);
     } catch (err) {
