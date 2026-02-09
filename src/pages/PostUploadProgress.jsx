@@ -7,6 +7,7 @@ const PostUploadProgress = ({ uploadProgress, runningCat }) => {
   return (
    <div className="w-full px-6 py-8">
       <div className="max-w-2xl mx-auto">
+        <p>sssfdf</p>
         {/* Progress container */}
         <div className="relative w-full h-20 rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 p-4 shadow-sm">
           

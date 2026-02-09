@@ -11,7 +11,7 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // Added State
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = userAuth();
@@ -47,7 +47,7 @@ export default function Login() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
-        
+
         {/* Left Side - Login Form */}
         <div className="w-full lg:w-auto max-w-md animate-fadeInLeft">
           <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/30 p-8 sm:p-10">
@@ -96,7 +96,7 @@ export default function Login() {
                     onChange={handleChange}
                     required
                   />
-                  
+
                   {/* Eye Toggle Button */}
                   <button
                     type="button"
@@ -166,6 +166,14 @@ export default function Login() {
               </span>
             </h3>
 
+            <div className="space-y-5">
+              <FeatureCard
+                icon="🎯"
+                title="Personalized Feed"
+                description="Experience content tailored to your interests and preferences"
+                delay="0.4s"
+              />
+            </div>
             <div className="space-y-5">
               <FeatureCard
                 icon="🎯"

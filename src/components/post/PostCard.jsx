@@ -1,8 +1,11 @@
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import api from "../../api/axios.js";
 import { userAuth } from "../../context/AuthContext.jsx";
+import VideoPlayer from "./VideoPlayer.jsx";
+
 function formatTimeAgo(dateStr) {
   try {
     const d = new Date(dateStr);
@@ -24,8 +27,11 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
   const avatar = populatedUser?.profilePicture || post?.avatar || "/user.png";
   const timeAgo = post?.createdAt ? formatTimeAgo(post.createdAt) : post?.timeAgo || "";
   const likesCount = Array.isArray(post?.likes) ? post.likes.length : post?.likes || 0;
-  const mediaImage = post?.image;
-  const mediaVideo = post?.video;
+
+  // Handle both old (image/video) and new (mediaUrl/mediaType) field structures
+  const mediaImage = post?.mediaType === "image" ? post?.mediaUrl : post?.image;
+  const mediaVideo = post?.mediaType === "video" ? post?.mediaUrl : post?.video;
+
   const isMe = user?._id && authorId && String(user._id) === String(authorId);
   const isFollowing = useMemo(() => {
     if (!user?._id || !authorId || !Array.isArray(user?.following)) return false;
@@ -51,8 +57,8 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
       const list = Array.isArray(data?.comments) ? data.comments : data;
       setComments(list);
       setCommentCount(list.length);
-    } catch (err) {
-      console.error("load comments failed", err);
+    } catch {
+      toast.error("load comments failed");
     } finally {
       setLoading(false);
     }
@@ -79,7 +85,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
       }
       setNewComment("");
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to add comment");
+      toast.error(err?.response?.data?.message || "Failed to add comment");
     }
   };
 
@@ -90,7 +96,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
       setComments((prev) => prev.filter((c) => c._id !== commentId));
       setCommentCount((c) => Math.max(0, c - 1));
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to delete comment");
+      toast.error(err?.response?.data?.message || "Failed to delete comment");
     }
   };
 
@@ -99,7 +105,8 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
     updateFollowing(authorId, "follow");
     try {
       await api.post(`/follow/${authorId}/follow`);
-    } catch (e) {
+    } catch {
+
       updateFollowing(authorId, "unfollow");
     }
   };
@@ -108,7 +115,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
     updateFollowing(authorId, "unfollow");
     try {
       await api.post(`/follow/${authorId}/unfollow`);
-    } catch (e) {
+    } catch {
       updateFollowing(authorId, "follow");
     }
   };
@@ -162,15 +169,17 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
 
       {/* Media */}
       <div
-        className="relative bg-gradient-to-br from-gray-50 to-purple-50/30 cursor-pointer"
-        onClick={onMediaClick}
+        className="relative bg-gradient-to-br from-gray-50 to-purple-50/30"
       >
         {mediaImage ? (
-          <img src={mediaImage} alt="Post" className="w-full max-h-[550px] object-cover" />
+          <img
+            src={mediaImage}
+            alt="Post"
+            className="w-full max-h-[550px] object-cover cursor-pointer"
+            onClick={onMediaClick}
+          />
         ) : mediaVideo ? (
-          <video controls className="w-full max-h-[550px] bg-black">
-            <source src={mediaVideo} />
-          </video>
+          <VideoPlayer src={mediaVideo} />
         ) : null}
       </div>
 

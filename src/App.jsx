@@ -1,7 +1,6 @@
 import { Toaster } from "react-hot-toast";
 import { Route, Routes, useLocation } from "react-router-dom";
 import './App.css';
-import SinglePostView from "./pages/SinglePostView.jsx";
 import BottomTab from "./components/common/BottomNav.jsx";
 import Navbar from './components/common/Navbar.jsx';
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
@@ -9,6 +8,8 @@ import PublicRoute from "./components/common/PublicRoute.jsx";
 import { userAuth } from "./context/AuthContext.jsx";
 import CreatePost from "./pages/CreatePost.jsx";
 import CreateReel from "./pages/CreateReel.jsx";
+import CreateStory from "./pages/CreateStory.jsx";
+import ErrorPage from "./pages/ErrorPage.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Profile from "./pages/Profile.jsx";
@@ -16,7 +17,8 @@ import ProfilePublicView from "./pages/ProfilePublicView.jsx";
 import Reels from "./pages/Reels.jsx";
 import Search from "./pages/Search.jsx";
 import Signup from "./pages/Signup.jsx";
-import CreateStory from "./pages/CreateStory.jsx";
+import SinglePostView from "./pages/SinglePostView.jsx";
+import Messages from "./pages/Messages.jsx";
 function App() {
   const location = useLocation();
   const hideLayout = ["/login", "/signup"].includes(location.pathname);
@@ -103,7 +105,15 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
+          path='/messages'
+          element={
+            <ProtectedRoute>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path='/post/:postId'
           element={
             <ProtectedRoute>
@@ -111,6 +121,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<ErrorPage />} />
         {/* <Route path="/__ping" element={<div style={{padding: 20}}>PING OK</div>} /> */}
       </Routes>
       {(() => {

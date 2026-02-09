@@ -32,10 +32,10 @@ export default function Search() {
     setError("");
     setLoading(true);
     try {
-      const { data } = await api.get("/search/search", { params: { query: q.trim() } });
+      const { data } = await api.get("/search/", { params: { query: q.trim() } });
       setUsers(Array.isArray(data?.userResult) ? data.userResult : []);
       setPosts(Array.isArray(data?.postResult) ? data.postResult : []);
-    } catch (err) {
+    } catch  {
       setError("Something went wrong with the search.");
     } finally {
       setLoading(false);
