@@ -1,11 +1,19 @@
 import axios from "axios";
 import getToken from "../utils/getToken.js";
 
+// const api = axios.create({
+//   baseURL: import.meta.env.VITE_BASE_URL || "https://social-media-backend-m0n7.onrender.com/api",
+//   withCredentials: true,
+//   timeout: 600000, 
+// });
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || "https://social-media-backend-m0n7.onrender.com/api",
+  baseURL: "http://localhost:5000/api",
   withCredentials: true,
-  timeout: 600000, 
+  timeout: 600000,
 });
+
+
 
 api.interceptors.request.use((config) => {
   const token = getToken();
@@ -15,6 +23,7 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
 
 api.interceptors.response.use(
   (response) => response,

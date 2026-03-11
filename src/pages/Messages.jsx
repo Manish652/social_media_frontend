@@ -28,35 +28,57 @@ export default function Messages() {
     if (user && token) {
       console.log("[Messages] Connecting socket with token");
       socket.auth = { token };
-      socket.connect();
 
-      socket.on("connect", () => {
-        console.log("[Messages] Socket connected:", socket.id);
-      });
+      if (!socket.connected) {
+        socket.connect();
+      }
 
-      socket.on("connect_error", (err) => {
-        console.error("[Messages] Socket connection error:", err.message);
-      });
+      const handleConnect = () => {
+        console.log("✅ [Messages] Socket connected:", socket.id);
+      };
+
+      const handleConnectError = (err) => {
+        console.error("❌ [Messages] Socket connection error:", err.message);
+      };
+
+      // Get initial online users list
+      const handleGetOnlineUsers = (users) => {
+        console.log("📊 [Messages] Initial online users:", users);
+        setOnlineUsers(new Set(users));
+      };
 
       // Listen for online/offline status
-      socket.on("userOnline", (userId) => {
-        console.log("[Messages] User online:", userId);
-        setOnlineUsers((prev) => new Set(prev).add(userId));
-      });
+      const handleUserOnline = (userId) => {
+        console.log("✅ [Messages] User online:", userId);
+        setOnlineUsers((prev) => {
+          const newSet = new Set(prev);
+          newSet.add(userId);
+          return newSet;
+        });
+      };
 
-      socket.on("userOffline", (userId) => {
-        console.log("[Messages] User offline:", userId);
+      const handleUserOffline = (userId) => {
+        console.log("❌ [Messages] User offline:", userId);
         setOnlineUsers((prev) => {
           const newSet = new Set(prev);
           newSet.delete(userId);
           return newSet;
         });
-      });
+      };
+
+      socket.on("connect", handleConnect);
+      socket.on("connect_error", handleConnectError);
+      socket.on("getOnlineUsers", handleGetOnlineUsers);
+      socket.on("userOnline", handleUserOnline);
+      socket.on("userOffline", handleUserOffline);
 
       return () => {
-        console.log("[Messages] Disconnecting socket");
-        socket.off("userOnline");
-        socket.off("userOffline");
+        console.log("[Messages] Cleaning up socket listeners");
+        socket.off("connect", handleConnect);
+        socket.off("connect_error", handleConnectError);
+        socket.off("getOnlineUsers", handleGetOnlineUsers);
+        socket.off("userOnline", handleUserOnline);
+        socket.off("userOffline", handleUserOffline);
         socket.disconnect();
       };
     }
@@ -65,31 +87,42 @@ export default function Messages() {
   // Listen for new messages
   useEffect(() => {
     const handleNewMessage = (newMessage) => {
-      console.log("[Messages] Received new message:", newMessage);
+      console.log("💬 [Messages] Received new message:", {
+        id: newMessage._id,
+        chatId: newMessage.chatId,
+        text: newMessage.text?.substring(0, 30),
+        senderId: newMessage.senderId
+      });
 
-      // Update messages if in the same chat
+      // Update messages if this chat is currently selected
       setMessages((prev) => {
-        // Only add if we're in the same chat and it's not a duplicate
         if (selectedChat && newMessage.chatId === selectedChat._id) {
+          // Check for duplicate
           if (prev.some((msg) => msg._id === newMessage._id)) {
-            console.log("[Messages] Duplicate message, skipping");
+            console.log("⚠️ [Messages] Duplicate message, skipping");
             return prev;
           }
-          console.log("[Messages] Adding message to current chat");
-          return [...prev, newMessage];
+
+          // Remove temp message if exists
+          const withoutTemp = prev.filter(msg => !msg.temp);
+          console.log("✅ [Messages] Adding message to current chat");
+          return [...withoutTemp, newMessage];
         }
-        console.log("[Messages] Message for different chat, updating chat list only");
         return prev;
       });
 
-      // Update chat list to show latest message
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
+      // Always update chat list with latest message
+      setChats((prevChats) => {
+        const updatedChats = prevChats.map((chat) =>
           chat._id === newMessage.chatId
-            ? { ...chat, lastMessage: newMessage }
+            ? { ...chat, lastMessage: newMessage, updatedAt: new Date().toISOString() }
             : chat
-        )
-      );
+        );
+        // Sort by most recent
+        return updatedChats.sort((a, b) =>
+          new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+        );
+      });
     };
 
     socket.on("newMessage", handleNewMessage);
@@ -142,12 +175,10 @@ export default function Messages() {
   const fetchMessages = async (chatId) => {
     try {
       const { data } = await api.get(`/message/chat/${chatId}`);
-      // Handle different response structures
       const msgs = Array.isArray(data) ? data : data.messages || data.message || [];
       setMessages(msgs);
     } catch (err) {
       console.error("Failed to fetch messages:", err);
-      // Set empty array on error so UI doesn't break
       setMessages([]);
     }
   };
@@ -158,7 +189,6 @@ export default function Messages() {
       setParticipants(Array.isArray(data) ? data : data.participants || []);
     } catch (err) {
       console.error("Failed to fetch participants:", err);
-      // Set empty array on error
       setParticipants([]);
     }
   };
@@ -180,7 +210,7 @@ export default function Messages() {
     const receiverId = otherParticipant?._id || otherParticipant;
 
     if (!receiverId) {
-      console.error("No receiver found");
+      console.error("❌ No receiver found");
       return;
     }
 
@@ -189,21 +219,31 @@ export default function Messages() {
       _id: tempId,
       text: messageText,
       senderId: user._id,
+      chatId: selectedChat._id,
       createdAt: new Date().toISOString(),
       temp: true,
     };
 
+    // Optimistically add message to UI
     setMessages((prev) => [...prev, tempMessage]);
     const textToSend = messageText;
     setMessageText("");
 
     try {
       setSending(true);
+      console.log("📤 [Messages] Sending message:", {
+        chatId: selectedChat._id,
+        receiverId,
+        text: textToSend.substring(0, 30)
+      });
+
       const { data } = await api.post("/message/send", {
         chatId: selectedChat._id,
         receiverId: receiverId,
         text: textToSend,
       });
+
+      console.log("✅ [Messages] Message sent successfully:", data._id);
 
       // Replace temp message with real one
       setMessages((prev) =>
@@ -211,17 +251,24 @@ export default function Messages() {
       );
 
       // Update chat list
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
+      setChats((prevChats) => {
+        const updated = prevChats.map((chat) =>
           chat._id === selectedChat._id
-            ? { ...chat, lastMessage: data }
+            ? { ...chat, lastMessage: data, updatedAt: new Date().toISOString() }
             : chat
-        )
-      );
+        );
+        // Sort by most recent
+        return updated.sort((a, b) =>
+          new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+        );
+      });
     } catch (err) {
-      console.error("Failed to send message:", err);
+      console.error("❌ Failed to send message:", err);
+      // Remove temp message on error
       setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
+      // Restore text
       setMessageText(textToSend);
+      alert("Failed to send message. Please try again.");
     } finally {
       setSending(false);
     }
@@ -269,7 +316,11 @@ export default function Messages() {
 
   const getOtherParticipant = (chat) => {
     if (!chat?.participants) return null;
-    return chat.participants.find((p) => p._id !== user._id);
+    const currentUserId = user._id.toString();
+    return chat.participants.find((p) => {
+      const participantId = (p._id || p).toString();
+      return participantId !== currentUserId;
+    });
   };
 
   const getChatName = (chat) => {
@@ -281,6 +332,24 @@ export default function Messages() {
     const other = getOtherParticipant(chat);
     return other?.profilePicture || "/user.png";
   };
+
+  // Debug: Log online users whenever they change
+  useEffect(() => {
+    console.log("🔍 [Messages] Current online users:", Array.from(onlineUsers));
+    console.log("🔍 [Messages] Current user ID:", user?._id);
+
+    // Debug: Check each chat's other participant
+    if (chats.length > 0) {
+      chats.forEach(chat => {
+        const other = getOtherParticipant(chat);
+        if (other) {
+          const otherId = other._id.toString();
+          const isOnline = onlineUsers.has(otherId);
+          console.log(`🔍 [Messages] Chat with ${other.username} (${otherId}): ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+        }
+      });
+    }
+  }, [onlineUsers, user, chats]);
 
   return (
     <div className="fixed inset-0 flex bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden pt-16 pb-16">
@@ -322,6 +391,10 @@ export default function Messages() {
             </div>
           ) : (
             chats.map((chat) => {
+              const otherUser = getOtherParticipant(chat);
+              const otherUserId = otherUser?._id?.toString();
+              const isUserOnline = otherUserId && onlineUsers.has(otherUserId);
+
               return (
                 <button
                   key={chat._id}
@@ -337,7 +410,9 @@ export default function Messages() {
                       alt={getChatName(chat)}
                       className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100"
                     />
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                    {isUserOnline && (
+                      <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                    )}
                   </div>
                   <div className="flex-1 text-left min-w-0">
                     <p className="font-semibold text-gray-900 truncate text-base">
@@ -381,7 +456,8 @@ export default function Messages() {
               />
               {(() => {
                 const other = getOtherParticipant(selectedChat);
-                const isOnline = other && onlineUsers.has(other._id || other);
+                const otherId = other?._id?.toString();
+                const isOnline = otherId && onlineUsers.has(otherId);
                 return isOnline ? (
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                 ) : null;
@@ -393,7 +469,8 @@ export default function Messages() {
               </h3>
               {(() => {
                 const other = getOtherParticipant(selectedChat);
-                const isOnline = other && onlineUsers.has(other._id || other);
+                const otherId = other?._id?.toString();
+                const isOnline = otherId && onlineUsers.has(otherId);
                 return (
                   <p className={`text-xs font-medium ${isOnline ? "text-green-600" : "text-gray-400"}`}>
                     {isOnline ? "Active now" : "Offline"}
