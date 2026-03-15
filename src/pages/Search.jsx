@@ -37,7 +37,7 @@ export default function Search() {
       const { data } = await api.get("/search/", { params: { query: q.trim() } });
       setUsers(Array.isArray(data?.userResult) ? data.userResult : []);
       setPosts(Array.isArray(data?.postResult) ? data.postResult : []);
-    } catch  {
+    } catch {
       setError("Something went wrong with the search.");
     } finally {
       setLoading(false);
@@ -47,7 +47,7 @@ export default function Search() {
   const hasSearched = users.length > 0 || posts.length > 0 || error || loading;
 
   return (
-    <div className="min-h-screen pb-28 bg-gradient-to-br from-gray-50 via-purple-50/20 to-pink-50/20">
+    <div className="min-h-screen pb-28 lg:pb-8 bg-gradient-to-br from-gray-50 via-purple-50/20 to-pink-50/20 lg:ml-64 xl:mr-80">
       <div className="max-w-2xl mx-auto px-4 pt-6">
         {/* Search Header */}
         <div className="text-center mb-6">

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 import Skaliton from "../components/layout/Skaliton.jsx";
 import PostCard from "../components/post/PostCard.jsx";
 import StoriesSection from "../components/story/StoriesSection.jsx";
 import { userAuth } from "../context/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -65,9 +65,9 @@ export default function Home() {
       try {
         const { data } = await api.get("/post");
         setPosts(data?.posts || []);
-      } catch(err) {
+      } catch (err) {
         console.error("Failed to load posts", err);
-       }
+      }
       console.error("toggle like failed", err);
     }
   };
@@ -83,12 +83,13 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen pb-24 bg-[#fafafa]">
+      {/* Main Content - Centered with sidebars on desktop */}
+      <div className="min-h-screen pb-24 lg:pb-8 bg-[#fafafa] lg:ml-64 xl:mr-80">
         {/* Stories Section */}
         <StoriesSection showCreateButton={false} />
 
-        {/* Feed */}
-        <div className="max-w-2xl mx-auto">
+        {/* Feed - Constrained width for better readability */}
+        <div className="max-w-[700px] mx-auto px-4">
           {loading && (
             <div className="space-y-4">
               <Skaliton />

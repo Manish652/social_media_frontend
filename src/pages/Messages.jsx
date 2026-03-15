@@ -352,7 +352,7 @@ export default function Messages() {
   }, [onlineUsers, user, chats]);
 
   return (
-    <div className="fixed inset-0 flex bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden pt-16 pb-16">
+    <div className="fixed inset-0 flex bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden pt-16 pb-16 lg:pb-0 lg:left-64 xl:right-80">
       {/* Chats List */}
       <div
         className={`${selectedChat ? "hidden md:flex" : "flex"

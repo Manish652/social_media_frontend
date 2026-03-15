@@ -1,14 +1,14 @@
-import { Bookmark, Film, Grid, Menu, Pencil, PlusCircle, BookHeart, Trash2, Sparkles } from "lucide-react";
+import { BookHeart, Bookmark, Film, Grid, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 import FollowListModal from "../components/common/FollowListModal.jsx";
 import Layout from "../components/layout/Layout.jsx";
+import EditPostModal from "../components/post/EditPostModal.jsx";
 import PostCard from "../components/post/PostCard.jsx";
 import ReelCard from "../components/reel/ReelCard.jsx";
 import { userAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
-import EditPostModal from "../components/post/EditPostModal.jsx";
 export default function Profile() {
   const { user, login, logout } = userAuth();
   const [profile, setProfile] = useState({
@@ -28,7 +28,7 @@ export default function Profile() {
   const [preview, setPreview] = useState("");
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [followModalType, setFollowModalType] = useState("followers");
-    const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
 
   useEffect(() => {
@@ -134,7 +134,7 @@ export default function Profile() {
       setDeleting(false);
     }
   };
-    const handleUpdatePost = (post) => {
+  const handleUpdatePost = (post) => {
     setEditingPost(post);
     setShowEditModal(true);
   };
@@ -211,7 +211,7 @@ export default function Profile() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 pb-24 lg:pb-8 lg:ml-64 xl:mr-80">
       <FollowListModal
         isOpen={showFollowModal}
         onClose={() => setShowFollowModal(false)}
@@ -220,7 +220,7 @@ export default function Profile() {
         currentUserId={user?._id}
       />
 
-        <EditPostModal
+      <EditPostModal
         isOpen={showEditModal}
         onClose={() => {
           setShowEditModal(false);

@@ -1,13 +1,11 @@
-import { Upload, Video, Sparkles, Wand2, X } from "lucide-react";
+import { Sparkles, Video, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
+import runningCat from "../assets/animations/Running Cat.json";
 import { userAuth } from "../context/AuthContext.jsx";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
-import Lottie from "lottie-react";
-import runningCat from "../assets/animations/Running Cat.json";
 import PostUploadProgress from "./PostUploadProgress.jsx";
-import animatin1 from "../assets/animations/Influencer photoshoot.json";
 
 export default function CreateReel() {
   const { user } = userAuth();
@@ -53,37 +51,11 @@ export default function CreateReel() {
   };
 
   return (
-    <div className="h-[100%] bg-gradient-to-br from-slate-50 to-indigo-50/30 pb-20 pt-10">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        
-        {/* Left Side: Engaging Content & Animation */}
-        <div className="hidden lg:flex flex-col space-y-8 animate-fadeInLeft">
-          <div className="space-y-4">
-            <h1 className="text-5xl font-black text-slate-800 leading-tight">
-              Share Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500">Story</span> <br /> 
-              in 60 Seconds.
-            </h1>
-            <p className="text-lg text-slate-600 max-w-md">
-              Reels are the best way to reach new audiences. High quality lighting and catchy captions get 2x more engagement!
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/30 pb-24 lg:pb-8 pt-10 lg:ml-64 xl:mr-80">
+      <div className="max-w-2xl mx-auto px-6">
 
-          <div className="relative w-full max-w-md">
-            {/* Lottie Animation */}
-            <Lottie animationData={animatin1} className="w-full drop-shadow-2xl" />
-            
-            {/* Floating Engagement Badges */}
-            <div className="absolute -top-4 -right-4 bg-white p-4 rounded-2xl shadow-xl animate-bounce duration-[3000ms] flex items-center gap-3 border border-purple-100">
-              <div className="bg-purple-100 p-2 rounded-lg text-purple-600"><Sparkles size={20} /></div>
-              <span className="text-sm font-bold text-slate-700">Go Viral</span>
-            </div>
-            
-       
-          </div>
-        </div>
-
-        {/* Right Side: Upload Form */}
-        <div className="w-full max-w-xl mx-auto lg:mx-0 animate-fadeInRight">
+        {/* Upload Form */}
+        <div className="w-full mx-auto animate-fadeInRight">
           <div className="bg-white/80 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-2xl border border-white relative overflow-hidden">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-slate-800">New Reel</h2>
@@ -147,10 +119,10 @@ export default function CreateReel() {
                 className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-purple-200 disabled:opacity-50 disabled:scale-100 transform active:scale-95 transition-all flex items-center justify-center gap-2"
               >
                 {loading ? (
-                   <span className="flex items-center gap-2">
-                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                     {uploadProgress || "Finalizing..."}
-                   </span>
+                  <span className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    {uploadProgress || "Finalizing..."}
+                  </span>
                 ) : (
                   <>
                     <Sparkles size={18} />

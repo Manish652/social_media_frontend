@@ -13,10 +13,12 @@ export default function CreateStory() {
   };
 
   return (
-    <CreateStoryModal
-      isOpen={true}
-      onClose={handleClose}
-      onSuccess={handleSuccess}
-    />
+    <div className="lg:ml-64 xl:mr-80">
+      <CreateStoryModal
+        isOpen={true}
+        onClose={handleClose}
+        onSuccess={handleSuccess}
+      />
+    </div>
   );
 }

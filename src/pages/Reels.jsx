@@ -234,9 +234,9 @@ export default function Reels() {
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="h-screen overflow-y-scroll snap-y snap-mandatory bg-black relative"
-      style={{ 
-        scrollbarWidth: 'none', 
+      className="h-screen overflow-y-scroll snap-y snap-mandatory bg-black relative lg:ml-64 xl:mr-80"
+      style={{
+        scrollbarWidth: 'none',
         msOverflowStyle: 'none',
         paddingBottom: 'env(safe-area-inset-bottom)'
       }}
@@ -330,7 +330,7 @@ export default function Reels() {
               <div className="absolute bottom-20 sm:bottom-24 left-4 right-20 sm:right-24 pointer-events-none z-10 pb-safe">
                 {reel.userId && (
                   <Link
-                   to={`/u/${reel.userId._id}`}
+                    to={`/u/${reel.userId._id}`}
 
                     className="inline-flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 pointer-events-auto group"
                   >

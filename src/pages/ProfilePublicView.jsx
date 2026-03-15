@@ -159,7 +159,7 @@ export default function ProfilePublicView() {
   const followingCount = Array.isArray(profile.following) ? profile.following.length : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 pb-24 lg:pb-8 lg:ml-64 xl:mr-80">
       <FollowListModal
         isOpen={showFollowModal}
         onClose={() => setShowFollowModal(false)}
