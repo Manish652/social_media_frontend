@@ -63,7 +63,7 @@ export default function StoriesSection({ showCreateButton = true }) {
 
   if (!loading && stories.length === 0) {
     return (
-      <div className="flex items-center justify-center w-full py-6 text-gray-400 text-sm">
+      <div className="flex items-center justify-center w-full py-6 text-base-content/60 text-sm">
         {showCreateButton
           ? "No stories yet — be the first to share ✨"
           : "No stories to show. Follow people to see their updates 👀"}
@@ -73,24 +73,24 @@ export default function StoriesSection({ showCreateButton = true }) {
 
   return (
     <>
-      <div className="bg-white border-b border-gray-200/50 sticky top-[60px] z-30">
+      <div className="bg-base-100 border-b border-base-200 sticky top-[60px] z-30">
         <div className="max-w-2xl mx-auto px-4 py-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-base-content uppercase tracking-wide">
             Stories
           </h3>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2">
             {/* Create Story Button */}
             {showCreateButton && (
               <button
                 onClick={() => setCreateStoryOpen(true)}
                 className="flex flex-col items-center cursor-pointer flex-shrink-0"
               >
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-105">
-                    <Plus size={28} className="text-white" />
+                <div className="avatar placeholder">
+                  <div className="bg-gradient-to-br from-primary to-secondary text-primary-content rounded-full w-14 h-14">
+                    <Plus size={28} />
                   </div>
                 </div>
-                <p className="text-xs mt-1 text-gray-700 truncate w-16 text-center font-medium">
+                <p className="text-xs mt-1 text-base-content truncate w-16 text-center font-medium">
                   Create
                 </p>
               </button>
@@ -101,8 +101,8 @@ export default function StoriesSection({ showCreateButton = true }) {
               <div className="flex gap-4">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="flex flex-col items-center">
-                    <div className="w-14 h-14 rounded-full bg-gray-200 animate-pulse" />
-                    <div className="w-12 h-3 bg-gray-200 rounded mt-1 animate-pulse" />
+                    <div className="skeleton w-14 h-14 rounded-full" />
+                    <div className="skeleton w-12 h-3 rounded mt-1" />
                   </div>
                 ))}
               </div>

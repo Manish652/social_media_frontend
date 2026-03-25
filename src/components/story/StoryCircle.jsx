@@ -7,20 +7,17 @@ export default function StoryCircle({ story, onClick }) {
       onClick={() => onClick?.(story)}
     >
       <div
-        className={`p-[2px] rounded-full ${story.hasStory
-            ? "bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500"
-            : "bg-gray-300"
-          }`}
+        className={`avatar ${story.hasStory ? "ring ring-primary ring-offset-base-100 ring-offset-2" : ""}`}
       >
-        <div className="bg-white p-[2px] rounded-full">
+        <div className={`w-14 h-14 rounded-full ${story.hasStory ? "ring ring-secondary ring-offset-base-100 ring-offset-2" : ""}`}>
           <img
             src={story.avatar}
             alt={story.username}
-            className="w-14 h-14 rounded-full object-cover"
+            className="w-full h-full object-cover rounded-full"
           />
         </div>
       </div>
-      <p className="text-xs mt-1 text-gray-700 truncate w-16 text-center">
+      <p className="text-xs mt-1 text-base-content truncate w-16 text-center">
         {displayName}
       </p>
     </div>

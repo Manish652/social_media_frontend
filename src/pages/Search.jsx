@@ -47,31 +47,31 @@ export default function Search() {
   const hasSearched = users.length > 0 || posts.length > 0 || error || loading;
 
   return (
-    <div className="min-h-screen pb-28 lg:pb-8 bg-gradient-to-br from-gray-50 via-purple-50/20 to-pink-50/20 lg:ml-64 xl:mr-80">
+    <div className="min-h-screen pb-28 lg:pb-8 bg-base-100 lg:ml-64 xl:mr-80">
       <div className="max-w-2xl mx-auto px-4 pt-6">
         {/* Search Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl mb-3">
-            <SearchIcon size={28} className="text-purple-600" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/20 rounded-2xl mb-3">
+            <SearchIcon size={28} className="text-primary" />
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Discover & Explore
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Search for people, posts, and more</p>
+          <p className="text-sm text-base-content/70 mt-1">Search for people, posts, and more</p>
         </div>
 
         {/* Search bar */}
         <form
           onSubmit={onSearch}
-          className="relative bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden focus-within:ring-4 focus-within:ring-purple-100 transition-all hover:shadow-xl"
+          className="relative bg-base-100 rounded-2xl shadow-lg border border-base-300/50 overflow-hidden focus-within:ring-4 focus-within:ring-primary/20 transition-all hover:shadow-xl"
         >
           <div className="flex items-center gap-3 px-5 py-4">
-            <SearchIcon size={20} className="text-gray-400 flex-shrink-0" />
+            <SearchIcon size={20} className="text-base-content/40 flex-shrink-0" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search users or captions..."
-              className="flex-1 outline-none text-sm bg-transparent placeholder-gray-400"
+              className="flex-1 outline-none text-sm bg-transparent placeholder-base-content/40"
             />
             <button
               type="submit"
@@ -100,12 +100,12 @@ export default function Search() {
         {/* Explore Posts - Show when no search */}
         {!hasSearched && randomPosts.length > 0 && (
           <div className="mt-6">
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-lg overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
+            <div className="bg-base-100 rounded-2xl border border-base-300/50 shadow-lg overflow-hidden">
+              <div className="px-5 py-4 border-b border-base-300 bg-gradient-to-r from-primary/10 to-secondary/10">
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={20} className="text-purple-600" />
-                  <span className="font-semibold text-gray-800">Explore</span>
-                  <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
+                  <TrendingUp size={20} className="text-primary" />
+                  <span className="font-semibold text-base-content">Explore</span>
+                  <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-primary/20 text-primary rounded-full">
                     Trending
                   </span>
                 </div>
@@ -149,13 +149,13 @@ export default function Search() {
         {hasSearched && (
           <div className="mt-6 space-y-6">
             {/* Users */}
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
+            <div className="bg-base-100 rounded-2xl border border-base-300/50 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="px-5 py-4 border-b border-base-300 bg-gradient-to-r from-primary/10 to-secondary/10">
                 <div className="flex items-center gap-2">
-                  <Users size={20} className="text-purple-600" />
-                  <span className="font-semibold text-gray-800">People</span>
+                  <Users size={20} className="text-primary" />
+                  <span className="font-semibold text-base-content">People</span>
                   {users.length > 0 && (
-                    <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
+                    <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-primary/20 text-primary rounded-full">
                       {users.length}
                     </span>
                   )}
@@ -164,21 +164,21 @@ export default function Search() {
               {loading ? (
                 <div className="p-8 text-center">
                   <div className="inline-block w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                  <p className="text-sm text-gray-500 mt-3">Searching for people...</p>
+                  <p className="text-sm text-base-content/70 mt-3">Searching for people...</p>
                 </div>
               ) : users.length === 0 ? (
                 <div className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Users size={28} className="text-gray-400" />
+                  <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Users size={28} className="text-base-content/40" />
                   </div>
-                  <p className="text-sm text-gray-400">No users found</p>
+                  <p className="text-sm text-base-content/40">No users found</p>
                 </div>
               ) : (
                 <ul>
                   {users.map((u) => (
                     <li
                       key={u._id}
-                      className="p-4 flex items-center gap-4 border-b last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/30 hover:to-pink-50/30 transition-colors"
+                      className="p-4 flex items-center gap-4 border-b last:border-b-0 hover:bg-base-200 transition-colors"
                     >
                       <div className="relative group">
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full opacity-0 group-hover:opacity-75 blur transition-opacity" />
@@ -206,13 +206,13 @@ export default function Search() {
             </div>
 
             {/* Posts */}
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
+            <div className="bg-base-100 rounded-2xl border border-base-300/50 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="px-5 py-4 border-b border-base-300 bg-gradient-to-r from-primary/10 to-secondary/10">
                 <div className="flex items-center gap-2">
-                  <Image size={20} className="text-purple-600" />
-                  <span className="font-semibold text-gray-800">Posts</span>
+                  <Image size={20} className="text-primary" />
+                  <span className="font-semibold text-base-content">Posts</span>
                   {posts.length > 0 && (
-                    <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
+                    <span className="ml-auto text-xs font-semibold px-2.5 py-1 bg-primary/20 text-primary rounded-full">
                       {posts.length}
                     </span>
                   )}
@@ -221,14 +221,14 @@ export default function Search() {
               {loading ? (
                 <div className="p-8 text-center">
                   <div className="inline-block w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                  <p className="text-sm text-gray-500 mt-3">Searching for posts...</p>
+                  <p className="text-sm text-base-content/70 mt-3">Searching for posts...</p>
                 </div>
               ) : posts.length === 0 ? (
                 <div className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Image size={28} className="text-gray-400" />
+                  <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Image size={28} className="text-base-content/40" />
                   </div>
-                  <p className="text-sm text-gray-400">No posts found</p>
+                  <p className="text-sm text-base-content/40">No posts found</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 p-1">

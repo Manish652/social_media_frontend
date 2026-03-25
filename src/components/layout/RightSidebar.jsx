@@ -37,13 +37,13 @@ export default function RightSidebar() {
   ];
 
   return (
-    <aside className="hidden xl:block fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 border-l border-gray-100 bg-white overflow-y-auto">
+    <aside className="hidden xl:block fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 border-l border-base-300 bg-base-100 overflow-y-auto">
       <div className="sticky top-0 p-4">
         {/* Suggested Users */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Suggested for you</h3>
-            <Link to="/search" className="text-sm text-purple-600 hover:text-purple-700">
+            <h3 className="font-semibold text-base-content">Suggested for you</h3>
+            <Link to="/search" className="text-sm text-primary hover:text-primary-focus">
               See All
             </Link>
           </div>
@@ -60,18 +60,18 @@ export default function RightSidebar() {
                 <div className="flex-1 min-w-0">
                   <Link
                     to={`/u/${user._id}`}
-                    className="block font-medium text-sm text-gray-900 hover:text-purple-600 truncate"
+                    className="block font-medium text-sm text-base-content hover:text-primary truncate"
                   >
                     {user.fullName || user.username}
                   </Link>
-                  <p className="text-xs text-gray-500 truncate">@{user.username}</p>
+                  <p className="text-xs text-base-content/70 truncate">@{user.username}</p>
                 </div>
                 <button
                   onClick={() => handleFollow(user._id)}
                   disabled={followingStates[user._id]}
                   className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${followingStates[user._id]
-                    ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                    : "bg-purple-600 text-white hover:bg-purple-700"
+                    ? "bg-base-200 text-base-content/70 cursor-not-allowed"
+                    : "bg-primary text-primary-content hover:bg-primary-focus"
                     }`}
                 >
                   {followingStates[user._id] ? "Following" : "Follow"}
@@ -83,33 +83,33 @@ export default function RightSidebar() {
 
         {/* Trending Topics */}
         <div className="mb-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Trending</h3>
+          <h3 className="font-semibold text-base-content mb-4">Trending</h3>
           <div className="space-y-3">
             {trendingTags.map((item) => (
               <Link
                 key={item.tag}
                 to={`/search?q=${item.tag}`}
-                className="block p-3 rounded-xl hover:bg-gray-50 transition-colors"
+                className="block p-3 rounded-xl hover:bg-base-200 transition-colors"
               >
-                <p className="font-medium text-gray-900">#{item.tag}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.posts} posts</p>
+                <p className="font-medium text-base-content">#{item.tag}</p>
+                <p className="text-xs text-base-content/70 mt-0.5">{item.posts} posts</p>
               </Link>
             ))}
           </div>
         </div>
 
         {/* Footer Links */}
-        <div className="pt-4 border-t border-gray-100">
-          <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-            <a href="#" className="hover:text-gray-700">About</a>
+        <div className="pt-4 border-t border-base-300">
+          <div className="flex flex-wrap gap-2 text-xs text-base-content/70">
+            <a href="#" className="hover:text-base-content">About</a>
             <span>·</span>
-            <a href="#" className="hover:text-gray-700">Help</a>
+            <a href="#" className="hover:text-base-content">Help</a>
             <span>·</span>
-            <a href="#" className="hover:text-gray-700">Privacy</a>
+            <a href="#" className="hover:text-base-content">Privacy</a>
             <span>·</span>
-            <a href="#" className="hover:text-gray-700">Terms</a>
+            <a href="#" className="hover:text-base-content">Terms</a>
           </div>
-          <p className="text-xs text-gray-400 mt-3">© 2024 Vibe</p>
+          <p className="text-xs text-base-content/50 mt-3">© 2024 Vibe</p>
         </div>
       </div>
     </aside>

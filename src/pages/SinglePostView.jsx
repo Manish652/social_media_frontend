@@ -77,23 +77,23 @@ export default function SinglePostView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 pb-24">
+      <div className="min-h-screen bg-base-100 pb-24">
         <div className="max-w-2xl mx-auto px-4 pt-6">
           <div className="flex items-center gap-3 mb-6">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-white rounded-full transition-all"
+              className="p-2 hover:bg-base-200 rounded-full transition-all"
             >
-              <ArrowLeft size={24} className="text-gray-700" />
+              <ArrowLeft size={24} className="text-base-content" />
             </button>
-            <h1 className="text-xl font-bold text-gray-900">Post</h1>
+            <h1 className="text-xl font-bold text-base-content">Post</h1>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+          <div className="bg-base-100 rounded-3xl shadow-xl border border-base-300 p-8">
             <div className="flex items-center justify-center">
               <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
             </div>
-            <p className="text-center text-gray-500 mt-4">Loading post...</p>
+            <p className="text-center text-base-content/70 mt-4">Loading post...</p>
           </div>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function SinglePostView() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 pb-24">
+      <div className="min-h-screen bg-base-100 pb-24">
         <div className="max-w-2xl mx-auto px-4 pt-6">
           <div className="flex items-center gap-3 mb-6">
             <button
@@ -114,12 +114,12 @@ export default function SinglePostView() {
             <h1 className="text-xl font-bold text-gray-900">Post</h1>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-12 text-center">
+          <div className="bg-base-100 rounded-3xl shadow-xl border border-base-300 p-12 text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-4xl">😕</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Post Not Found</h2>
-            <p className="text-gray-500 mb-6">{error || "This post may have been deleted or doesn't exist."}</p>
+            <h2 className="text-xl font-bold text-base-content mb-2">Post Not Found</h2>
+            <p className="text-base-content/70 mb-6">{error || "This post may have been deleted or doesn't exist."}</p>
             <button
               onClick={() => navigate(-1)}
               className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
@@ -133,17 +133,17 @@ export default function SinglePostView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 pb-24 lg:pb-8 lg:ml-64 xl:mr-80">
+    <div className="min-h-screen bg-base-100 pb-24 lg:pb-8 lg:ml-64 xl:mr-80">
       <div className="max-w-2xl mx-auto px-4 pt-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-white rounded-full transition-all hover:scale-105 active:scale-95"
+            className="p-2 hover:bg-base-200 rounded-full transition-all hover:scale-105 active:scale-95"
           >
-            <ArrowLeft size={24} className="text-gray-700" />
+            <ArrowLeft size={24} className="text-base-content" />
           </button>
-          <h1 className="text-xl font-bold text-gray-900">Post</h1>
+          <h1 className="text-xl font-bold text-base-content">Post</h1>
         </div>
 
         {/* Post Card */}

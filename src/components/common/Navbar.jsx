@@ -2,10 +2,13 @@ import { LogOut, Search } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { userAuth } from "../../context/AuthContext.jsx";
+import { useTheme } from "../../context/ThemeContext.jsx";
 import Notification from "./Notification";
-import { MessageCircle } from "lucide-react";
+import ThemeSelector from "./ThemeSelector";
+import { MessageCircle, Sun, Moon } from "lucide-react";
 export function Navbar() {
   const { user, token, logout } = userAuth();
+  const { theme, toggleTheme } = useTheme();
   const isAuthed = Boolean(token);
   const avatar = user?.profilePicture || "/user.png";
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,107 +21,91 @@ export function Navbar() {
   // }, []);
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-xl shadow-sm' : 'bg-white'
-      } border-b border-gray-100`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+    <nav className="navbar sticky top-0 z-50 bg-base-100 shadow-sm border-b border-base-200">
+      <div className="navbar-start">
+        <Link
+          to="/"
+          className="btn btn-ghost normal-case text-xl font-black bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent"
+        >
+          Vibe
+        </Link>
+      </div>
+
+      <div className="navbar-center hidden lg:flex">
+        {/* You can add search here if needed */}
+      </div>
+
+      <div className="navbar-end gap-2">
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="btn btn-ghost btn-circle"
+          aria-label="Toggle theme"
+        >
+          {theme === 'light' ? (
+            <Moon size={20} />
+          ) : (
+            <Sun size={20} />
+          )}
+        </button>
+
+        {/* Theme Selector */}
+        <ThemeSelector />
+
+        {/* Search Button */}
+        <Link
+          to="/search"
+          className="btn btn-ghost btn-circle"
+          aria-label="Search"
+        >
+          <Search size={20} />
+        </Link>
+
+        {/* Notifications */}
+        {isAuthed && <Notification token={token} />}
+
+        {/* Messages */}
+        {isAuthed && (
           <Link
-            to="/"
-            className="group flex items-center gap-2 transition-transform hover:scale-105"
+            to="/messages"
+            className="btn btn-ghost btn-circle"
+            aria-label="Messages"
           >
-            <div className="relative">
-              <div className="absolute inset-0 rounded-lg blur-sm opacity-75 group-hover:opacity-100 transition-opacity"></div>
-              <span className="relative block text-2xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent px-3 py-1">
-                Vibe
-              </span>
-            </div>
+            <MessageCircle size={20} />
           </Link>
+        )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            {/* Search Button */}
-            <Link
-              to="/search"
-              className="p-2.5 rounded-full hover:bg-gray-100 transition-all duration-200 group relative"
-              aria-label="Search"
-            >
-              <Search
-                size={20}
-                className="text-gray-600 group-hover:text-purple-600 transition-colors"
-              />
-              <span className="absolute inset-0 rounded-full bg-purple-100 scale-0 group-hover:scale-100 transition-transform duration-200 -z-10"></span>
-            </Link>
-
-            {/* Notifications */}
-            {isAuthed && <Notification token={token} />}
-
-            {/* Messages */}
-            {isAuthed && (
-              <Link
-                to="/messages"
-                className="p-2.5 rounded-full hover:bg-gray-100 transition-all duration-200 group relative"
-                aria-label="Messages"
-              >
-                <MessageCircle
-                  size={20}
-                  className="text-gray-600 group-hover:text-purple-600 transition-colors"
-                />
-                <span className="absolute inset-0 rounded-full bg-purple-100 scale-0 group-hover:scale-100 transition-transform duration-200 -z-10"></span>
-              </Link>
-            )}
-
-            {isAuthed ? (
-              <div className="flex items-center gap-3 ml-2">
-                {/* Profile */}
-                <Link
-                  to="/profile"
-                  className="group relative"
-                  aria-label="Profile"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
-                  <img
-                    src={avatar}
-                    alt="Profile"
-                    className="relative w-9 h-9 rounded-full object-cover ring-2 ring-white group-hover:ring-purple-200 transition-all duration-200"
-                  />
+        {isAuthed ? (
+          <div className="dropdown dropdown-end">
+            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+              <div className="w-10 rounded-full">
+                <img src={avatar} alt="Profile" />
+              </div>
+            </label>
+            <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+              <li>
+                <Link to="/profile" className="justify-between">
+                  Profile
                 </Link>
-
-                {/* Logout Button */}
-                <button
-                  onClick={logout}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 transition-all duration-200 text-sm font-medium group"
-                >
-                  <LogOut
-                    size={16}
-                    className="group-hover:rotate-6 transition-transform duration-200"
-                  />
-                  <span className="hidden sm:inline">Logout</span>
+              </li>
+              <li>
+                <button onClick={logout}>
+                  <LogOut size={16} />
+                  Logout
                 </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 ml-2">
-                {/* Login Button */}
-                <Link
-                  to="/login"
-                  className="px-4 py-2 rounded-full text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 text-sm font-medium"
-                >
-                  Login
-                </Link>
-
-                {/* Sign Up Button */}
-                <Link
-                  to="/signup"
-                  className="relative px-5 py-2 rounded-full text-white font-medium text-sm overflow-hidden group"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-[length:200%_100%] group-hover:bg-[position:100%_0] transition-all duration-500"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-300"></div>
-                  <span className="relative">Sign Up</span>
-                </Link>
-              </div>
-            )}
+              </li>
+            </ul>
           </div>
-        </div>
+        ) : (
+          <div className="flex gap-2">
+            <Link to="/login" className="btn btn-ghost">
+              Login
+            </Link>
+            <Link to="/signup" className="btn btn-primary">
+              Sign Up
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );

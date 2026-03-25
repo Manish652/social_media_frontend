@@ -15,7 +15,7 @@ import ErrorPage from "./pages/ErrorPage.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Messages from "./pages/Messages.jsx";
-import Notifications from "./pages/Notifications.jsx";
+import Notifications from "././components/common/Notification.jsx";
 import Profile from "./pages/Profile.jsx";
 import ProfilePublicView from "./pages/ProfilePublicView.jsx";
 import Reels from "./pages/Reels.jsx";

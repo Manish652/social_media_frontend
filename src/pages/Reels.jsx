@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios.js";
 import { userAuth } from "../context/AuthContext.jsx";
+import { optimizeCloudinaryVideo } from "../utils/optimizeMedia.js";
 
 export default function Reels() {
   const { user } = userAuth();
@@ -267,11 +268,14 @@ export default function Reels() {
           >
             <video
               ref={el => (videoRefs.current[index] = el)}
-              src={reel.videoUrl}
-              className="h-full w-full object-contain bg-black"
+              src={optimizeCloudinaryVideo(reel.videoUrl)}
+              className="h-full w-full object-contain bg-black pointer-events-none"
               loop
               muted={muted}
               playsInline
+              controlsList="nodownload noplaybackrate"
+              disablePictureInPicture
+              onContextMenu={(e) => e.preventDefault()}
               autoPlay={index === 0}
               onTimeUpdate={() => handleTimeUpdate(index)}
               onClick={handleVideoClick}

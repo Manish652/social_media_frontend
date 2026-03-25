@@ -352,11 +352,11 @@ export default function Messages() {
   }, [onlineUsers, user, chats]);
 
   return (
-    <div className="fixed inset-0 flex bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden pt-16 pb-16 lg:pb-0 lg:left-64 xl:right-80">
+    <div className="fixed inset-0 flex bg-base-100 overflow-hidden pt-16 pb-16 lg:pb-0 lg:left-64 xl:right-80">
       {/* Chats List */}
       <div
         className={`${selectedChat ? "hidden md:flex" : "flex"
-          } w-full md:w-[380px] bg-white shadow-xl flex-col overflow-hidden`}
+          } w-full md:w-[380px] bg-base-100 shadow-xl flex-col overflow-hidden`}
       >
         <div className="p-5 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-white">Messages</h2>
@@ -373,10 +373,10 @@ export default function Messages() {
             <div className="p-3 space-y-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
-                  <div className="w-14 h-14 rounded-full bg-gray-200" />
+                  <div className="w-14 h-14 rounded-full bg-base-200" />
                   <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                    <div className="h-4 bg-base-200 rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-base-200 rounded w-1/2" />
                   </div>
                 </div>
               ))}
@@ -386,8 +386,8 @@ export default function Messages() {
               <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-4">
                 <p className="text-5xl">💬</p>
               </div>
-              <p className="font-semibold text-gray-800 text-lg mb-1">No messages yet</p>
-              <p className="text-sm text-gray-500">Start a new conversation!</p>
+              <p className="font-semibold text-base-content text-lg mb-1">No messages yet</p>
+              <p className="text-sm text-base-content/70">Start a new conversation!</p>
             </div>
           ) : (
             chats.map((chat) => {
@@ -400,8 +400,8 @@ export default function Messages() {
                   key={chat._id}
                   onClick={() => handleSelectChat(chat)}
                   className={`w-full p-4 flex items-center gap-3 transition-all duration-200 border-l-4 ${selectedChat?._id === chat._id
-                    ? "bg-gradient-to-r from-purple-50 to-pink-50 border-purple-600"
-                    : "border-transparent hover:bg-gray-50"
+                    ? "bg-primary/10 border-primary"
+                    : "border-transparent hover:bg-base-200"
                     }`}
                 >
                   <div className="relative">
@@ -411,19 +411,19 @@ export default function Messages() {
                       className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100"
                     />
                     {isUserOnline && (
-                      <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                      <div className="absolute bottom-0 right-0 w-4 h-4 bg-success rounded-full border-2 border-base-100"></div>
                     )}
                   </div>
                   <div className="flex-1 text-left min-w-0">
-                    <p className="font-semibold text-gray-900 truncate text-base">
+                    <p className="font-semibold text-base-content truncate text-base">
                       {getChatName(chat)}
                     </p>
-                    <p className="text-sm text-gray-500 truncate mt-0.5">
+                    <p className="text-sm text-base-content/70 truncate mt-0.5">
                       {chat.lastMessage?.text || "Start chatting"}
                     </p>
                   </div>
                   {chat.lastMessage && (
-                    <span className="text-xs text-gray-400 font-medium">
+                    <span className="text-xs text-base-content/50 font-medium">
                       {formatTime(chat.lastMessage.createdAt)}
                     </span>
                   )}
@@ -436,35 +436,35 @@ export default function Messages() {
 
       {/* Chat Area */}
       {selectedChat ? (
-        <div className="flex-1 flex flex-col bg-white shadow-lg overflow-hidden" style={{ height: 'calc(100vh - 8rem)' }}>
+        <div className="flex-1 flex flex-col bg-base-100 shadow-lg overflow-hidden" style={{ height: 'calc(100vh - 8rem)' }}>
           {/* Chat Header */}
-          <div className="p-4 bg-white border-b border-gray-200 flex items-center gap-3 shadow-sm flex-shrink-0">
+          <div className="p-4 bg-base-100 border-b border-base-300 flex items-center gap-3 shadow-sm flex-shrink-0">
             <button
               onClick={() => {
                 setSelectedChat(null);
                 navigate("/messages");
               }}
-              className="md:hidden p-2 hover:bg-purple-50 rounded-full transition-colors"
+              className="md:hidden p-2 hover:bg-primary/10 rounded-full transition-colors"
             >
-              <ArrowLeft size={20} className="text-purple-600" />
+              <ArrowLeft size={20} className="text-primary" />
             </button>
             <div className="relative">
               <img
                 src={getChatAvatar(selectedChat)}
                 alt={getChatName(selectedChat)}
-                className="w-11 h-11 rounded-full object-cover ring-2 ring-purple-100"
+                className="w-11 h-11 rounded-full object-cover ring-2 ring-base-300"
               />
               {(() => {
                 const other = getOtherParticipant(selectedChat);
                 const otherId = other?._id?.toString();
                 const isOnline = otherId && onlineUsers.has(otherId);
                 return isOnline ? (
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100"></div>
                 ) : null;
               })()}
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-gray-900 text-base">
+              <h3 className="font-bold text-base-content text-base">
                 {getChatName(selectedChat)}
               </h3>
               {(() => {
@@ -472,7 +472,7 @@ export default function Messages() {
                 const otherId = other?._id?.toString();
                 const isOnline = otherId && onlineUsers.has(otherId);
                 return (
-                  <p className={`text-xs font-medium ${isOnline ? "text-green-600" : "text-gray-400"}`}>
+                  <p className={`text-xs font-medium ${isOnline ? "text-success" : "text-base-content/60"}`}>
                     {isOnline ? "Active now" : "Offline"}
                   </p>
                 );
@@ -480,10 +480,10 @@ export default function Messages() {
             </div>
             <button
               onClick={() => handleDeleteChat(selectedChat._id)}
-              className="p-2 hover:bg-red-50 rounded-full transition-colors"
+              className="p-2 hover:bg-error/10 rounded-full transition-colors"
               title="Delete conversation"
             >
-              <Trash2 size={20} className="text-red-600" />
+              <Trash2 size={20} className="text-error" />
             </button>
           </div>
 
@@ -492,7 +492,7 @@ export default function Messages() {
             className="flex-1 overflow-y-auto p-6 space-y-4"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundColor: "#fafafa",
+              backgroundColor: "hsl(var(--b1))",
             }}
           >
             {Array.isArray(messages) && messages.length > 0 ? (
@@ -515,7 +515,7 @@ export default function Messages() {
                         <img
                           src={sender?.profilePicture || "/user.png"}
                           alt={sender?.username || "User"}
-                          className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-100"
+                          className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-base-300"
                         />
                       )}
                       {!isMe && !showAvatar && <div className="w-8" />}
@@ -523,7 +523,7 @@ export default function Messages() {
                         <div
                           className={`px-4 py-2.5 shadow-sm ${isMe
                             ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl rounded-tr-md"
-                            : "bg-white text-gray-900 rounded-3xl rounded-tl-md border border-gray-200"
+                            : "bg-base-100 text-base-content rounded-3xl rounded-tl-md border border-base-300"
                             } ${msg.temp ? "opacity-60 animate-pulse" : ""}`}
                           onContextMenu={(e) => {
                             if (isMe) {
@@ -535,7 +535,7 @@ export default function Messages() {
                           <p className="text-[15px] leading-relaxed break-words">{msg.text}</p>
                         </div>
                         <p
-                          className={`text-[11px] text-gray-400 mt-1 px-1 font-medium ${isMe ? "text-right" : "text-left"
+                          className={`text-[11px] text-base-content/50 mt-1 px-1 font-medium ${isMe ? "text-right" : "text-left"
                             }`}
                         >
                           {formatTime(msg.createdAt)}
@@ -551,8 +551,8 @@ export default function Messages() {
                   <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <p className="text-4xl">👋</p>
                   </div>
-                  <p className="text-base font-semibold text-gray-700">No messages yet</p>
-                  <p className="text-sm text-gray-500 mt-1">Say hi to start the conversation!</p>
+                  <p className="text-base font-semibold text-base-content">No messages yet</p>
+                  <p className="text-sm text-base-content/70 mt-1">Say hi to start the conversation!</p>
                 </div>
               </div>
             )}
@@ -562,20 +562,20 @@ export default function Messages() {
           {/* Message Input */}
           <form
             onSubmit={handleSendMessage}
-            className="p-4 bg-white border-t border-gray-200 flex-shrink-0"
+            className="p-4 bg-base-100 border-t border-base-300 flex-shrink-0"
           >
-            <div className="flex items-center gap-2 bg-gray-50 rounded-full px-4 py-2 border border-gray-200 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
+            <div className="flex items-center gap-2 bg-base-200 rounded-full px-4 py-2 border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
               <button
                 type="button"
-                className="p-1.5 hover:bg-purple-100 rounded-full transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
               >
-                <Image size={20} className="text-purple-600" />
+                <Image size={20} className="text-primary" />
               </button>
               <button
                 type="button"
-                className="p-1.5 hover:bg-purple-100 rounded-full transition-colors flex-shrink-0"
+                className="p-1.5 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
               >
-                <Smile size={20} className="text-purple-600" />
+                <Smile size={20} className="text-primary" />
               </button>
               <input
                 type="text"

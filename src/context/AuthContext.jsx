@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import api from "../api/axios.js";
+import { setToken as setMemoryToken } from "../utils/getToken.js";
 
 const AuthContext = createContext();
 
@@ -27,35 +29,54 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user");
-      if (savedToken) setToken(savedToken);
-      if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        const normalized = normalizeUserData(parsed);
-        setUser(normalized);
-        try { localStorage.setItem("user", JSON.stringify(normalized)); } catch { }
+    const initializeAuth = async () => {
+      try {
+        const { data } = await api.get("/user/refresh");
+        setMemoryToken(data.token);
+        setToken(data.token);
+
+        if (data.user) {
+          const normalized = normalizeUserData(data.user);
+          setUser(normalized);
+          try { localStorage.setItem("user", JSON.stringify(normalized)); } catch { }
+        } else {
+          // Fallback to localStorage if the refresh didn't send user object for some reason
+          const savedUser = localStorage.getItem("user");
+          if (savedUser) {
+            const parsed = JSON.parse(savedUser);
+            const normalized = normalizeUserData(parsed);
+            setUser(normalized);
+            try { localStorage.setItem("user", JSON.stringify(normalized)); } catch { }
+          }
+        }
+      } catch (err) {
+        // Not authenticated
+        setMemoryToken(null);
+        setToken(null);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to load auth data:", err);
-    }
-    setLoading(false);
+    };
+    initializeAuth();
   }, []);
 
   const login = (userData, userToken) => {
     const normalized = normalizeUserData(userData);
     setUser(normalized);
     setToken(userToken);
-    localStorage.setItem("token", userToken);
+    setMemoryToken(userToken);
     localStorage.setItem("user", JSON.stringify(normalized));
-
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.post("/user/logout");
+    } catch (err) {
+      console.error("Logout failed on server", err);
+    }
     setUser(null);
     setToken(null);
-    localStorage.removeItem("token");
+    setMemoryToken(null);
     localStorage.removeItem("user");
 
     // Disconnect socket on logout

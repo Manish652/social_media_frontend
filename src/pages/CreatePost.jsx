@@ -7,8 +7,6 @@ import runningCat from "../assets/animations/Running Cat.json";
 import { getMediaType, uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import PostUploadProgress from "./PostUploadProgress.jsx";
 
-// Assets
-
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
@@ -65,15 +63,15 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-10 pb-24 lg:pb-8 px-4 lg:ml-64 xl:mr-80">
+    <div className="min-h-screen bg-base-200 pt-10 pb-24 lg:pb-8 px-4 lg:ml-64 xl:mr-80 transition-colors duration-300">
       <div className="max-w-[900px] mx-auto grid grid-cols-1 gap-8 items-start">
 
         {/* The Post Form */}
         <div className="w-full max-w-2xl mx-auto animate-fadeInUp">
-          <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white p-6 sm:p-8">
+          <div className="bg-base-100 rounded-[2.5rem] shadow-2xl border border-base-300 p-6 sm:p-8 transition-colors duration-300">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-                Create Post <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
+              <h2 className="text-2xl font-black text-base-content flex items-center gap-2">
+                Create Post <div className="w-2 h-2 bg-success rounded-full animate-ping" />
               </h2>
             </div>
 
@@ -84,18 +82,18 @@ export default function CreatePost() {
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
                   rows="5"
-                  className="w-full bg-slate-50/50 border border-slate-200 rounded-3xl px-6 py-5 focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all resize-none text-lg text-slate-700 placeholder:text-slate-400"
+                  className="w-full bg-base-200 border border-base-300 rounded-3xl px-6 py-5 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all resize-none text-lg text-base-content placeholder:text-base-content/40"
                   placeholder="What's happening? Spark a conversation..."
                 />
-                <div className="absolute bottom-4 right-6 flex items-center gap-3 text-slate-400">
-                  <Smile size={20} className="hover:text-purple-500 cursor-pointer transition-colors" />
+                <div className="absolute bottom-4 right-6 flex items-center gap-3 text-base-content/30">
+                  <Smile size={20} className="hover:text-primary cursor-pointer transition-colors" />
                 </div>
               </div>
 
               {/* Media Preview / Upload Dropzone */}
               <div className="relative">
                 {preview ? (
-                  <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-xl group">
+                  <div className="relative rounded-3xl overflow-hidden bg-black shadow-xl group border border-base-300">
                     {media?.type.startsWith("image/") ? (
                       <img src={preview} alt="Preview" className="w-full max-h-[400px] object-contain mx-auto" />
                     ) : (
@@ -104,19 +102,19 @@ export default function CreatePost() {
                     <button
                       type="button"
                       onClick={removeMedia}
-                      className="absolute top-4 right-4 bg-black/50 hover:bg-red-500 backdrop-blur-md text-white p-2 rounded-full transition-all transform hover:scale-110"
+                      className="absolute top-4 right-4 bg-black/50 hover:bg-error backdrop-blur-md text-white p-2 rounded-full transition-all transform hover:scale-110 border border-white/20"
                     >
                       <X size={20} />
                     </button>
                   </div>
                 ) : (
-                  <label className="group flex flex-col items-center justify-center gap-4 p-12 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:border-purple-400 hover:bg-purple-50/30 transition-all duration-300">
-                    <div className="w-16 h-16 bg-white shadow-md rounded-2xl flex items-center justify-center text-purple-500 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+                  <label className="group flex flex-col items-center justify-center gap-4 p-12 border-2 border-dashed border-base-300 rounded-[2rem] cursor-pointer hover:border-primary hover:bg-primary/5 transition-all duration-300">
+                    <div className="w-16 h-16 bg-base-200 shadow-sm rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 group-hover:rotate-3 transition-transform">
                       <Image size={32} />
                     </div>
                     <div className="text-center">
-                      <span className="block text-lg font-bold text-slate-700">Add Photos or Video</span>
-                      <span className="text-sm text-slate-400">Drag and drop or click to browse</span>
+                      <span className="block text-lg font-bold text-base-content">Add Photos or Video</span>
+                      <span className="text-sm text-base-content/50 uppercase tracking-widest font-bold">Drag and drop or browse</span>
                     </div>
                     <input type="file" accept="image/*,video/*" onChange={onFileChange} className="hidden" />
                   </label>
@@ -132,7 +130,7 @@ export default function CreatePost() {
               <button
                 type="submit"
                 disabled={submitting || (!caption && !media)}
-                className="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-purple-200 disabled:opacity-40 disabled:cursor-not-allowed transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg"
+                className="btn btn-neutral w-full h-16 rounded-2xl shadow-xl hover:bg-primary hover:border-primary text-white border-none disabled:bg-base-300 disabled:text-base-content/30 transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-lg group"
               >
                 {submitting ? (
                   <div className="flex items-center gap-2">
@@ -141,7 +139,7 @@ export default function CreatePost() {
                   </div>
                 ) : (
                   <>
-                    <Send size={20} />
+                    <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                     Post Vibe
                   </>
                 )}

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import api from "../../api/axios.js";
 import { userAuth } from "../../context/AuthContext.jsx";
 import VideoPlayer from "./VideoPlayer.jsx";
+import { optimizeCloudinaryVideo } from "../../utils/optimizeMedia.js";
 
 function formatTimeAgo(dateStr) {
   try {
@@ -121,61 +122,64 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300">
+    <div className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-white via-purple-50/20 to-pink-50/20">
-        <div className="flex items-center gap-3">
-          <Link to={authorId ? `/u/${authorId}` : "#"} className="shrink-0 relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-0 group-hover:opacity-100 blur transition-opacity" />
-            <img
-              src={avatar}
-              alt={username}
-              className="relative w-11 h-11 rounded-full object-cover border-2 border-white shadow-md"
-            />
-          </Link>
-          <div>
-            <Link to={authorId ? `/u/${authorId}` : "#"} className="font-bold text-gray-900 text-sm hover:text-purple-600 transition-colors">
-              {username}
+      <div className="card-body p-5 bg-gradient-to-r from-base-100 via-primary/5 to-secondary/5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to={authorId ? `/u/${authorId}` : "#"} className="avatar placeholder group">
+              <div className="bg-neutral text-neutral-content rounded-full w-11 h-11 ring ring-primary ring-offset-base-100 ring-offset-2 group-hover:ring-secondary">
+                <img
+                  src={avatar}
+                  alt={username}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
             </Link>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <div className="w-1 h-1 rounded-full bg-purple-400" />
-              <p className="text-xs text-gray-500 font-medium">{timeAgo}</p>
+            <div>
+              <Link to={authorId ? `/u/${authorId}` : "#"} className="font-bold text-base-content hover:text-primary transition-colors">
+                {username}
+              </Link>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="w-1 h-1 rounded-full bg-primary" />
+                <p className="text-xs text-base-content/60 font-medium">{timeAgo}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {!isMe && authorId && !isFollowing && (
-            <button
-              onClick={handleFollow}
-              className="px-4 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
-            >
-              Follow
+          <div className="flex items-center gap-2">
+            {!isMe && authorId && !isFollowing && (
+              <button
+                onClick={handleFollow}
+                className="btn btn-primary btn-sm"
+              >
+                Follow
+              </button>
+            )}
+            {!isMe && authorId && isFollowing && (
+              <button
+                onClick={handleUnfollow}
+                className="btn btn-outline btn-sm"
+              >
+                Following
+              </button>
+            )}
+            <button className="btn btn-ghost btn-circle btn-sm">
+              <MoreHorizontal size={18} />
             </button>
-          )}
-          {!isMe && authorId && isFollowing && (
-            <button
-              onClick={handleUnfollow}
-              className="px-4 py-1.5 text-xs font-semibold rounded-full border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all"
-            >
-              Following
-            </button>
-          )}
-          <button className="p-2 hover:bg-purple-50 rounded-full transition-colors">
-            <MoreHorizontal size={18} className="text-gray-600" />
-          </button>
+          </div>
         </div>
       </div>
 
       {/* Media */}
-      <div
-        className="relative bg-gradient-to-br from-gray-50 to-purple-50/30"
-      >
+      <div className="bg-base-200/30">
         {mediaImage ? (
           <img
-            src={mediaImage}
+            src={optimizeCloudinaryVideo(mediaImage)}
             alt="Post"
-            className="w-full max-h-[550px] object-cover cursor-pointer"
+            className="w-full max-h-[550px] object-cover cursor-pointer select-none"
+            draggable="false"
+            onContextMenu={(e) => e.preventDefault()}
             onClick={onMediaClick}
           />
         ) : mediaVideo ? (
@@ -184,67 +188,74 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
       </div>
 
       {/* Actions Bar */}
-      <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-purple-50/30 via-white to-pink-50/30">
-        <div className="flex items-center gap-5">
+      <div className="card-body p-5 bg-gradient-to-r from-primary/5 via-base-100 to-secondary/5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <button
+              onClick={onLike}
+              className={`btn btn-ghost btn-circle ${isLiked ? "btn-error" : ""}`}
+            >
+              <Heart
+                size={24}
+                fill={isLiked ? "currentColor" : "none"}
+                strokeWidth={2}
+              />
+            </button>
+
+            <button
+              className="btn btn-ghost btn-circle relative"
+              onClick={toggleComments}
+            >
+              <MessageCircle size={24} strokeWidth={2} />
+              {commentCount > 0 && (
+                <span className="badge badge-primary badge-sm absolute -top-1 -right-1">
+                  {commentCount}
+                </span>
+              )}
+            </button>
+          </div>
+
           <button
-            onClick={onLike}
-            className={`group relative p-2 rounded-xl transition-all ${isLiked
-              ? "bg-red-50 scale-110"
-              : "hover:bg-purple-50 hover:scale-105"
-              }`}
+            onClick={onSave}
+            className={`btn btn-ghost btn-circle ${isSaved ? "btn-warning" : ""}`}
           >
-            <Heart
+            <Bookmark
               size={24}
-              fill={isLiked ? "currentColor" : "none"}
-              className={isLiked ? "text-red-500" : "text-gray-700 group-hover:text-purple-600"}
+              fill={isSaved ? "currentColor" : "none"}
               strokeWidth={2}
             />
           </button>
-
-          <button
-            className="relative p-2 rounded-xl hover:bg-purple-50 hover:scale-105 transition-all group"
-            onClick={toggleComments}
-          >
-            <MessageCircle size={24} strokeWidth={2} className="text-gray-700 group-hover:text-purple-600" />
-            {commentCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center text-[10px] font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white px-1.5 rounded-full shadow-lg">
-                {commentCount}
-              </span>
-            )}
-          </button>
         </div>
-
-        <button
-          onClick={onSave}
-          className={`group p-2 rounded-xl transition-all ${isSaved
-            ? "bg-yellow-50 scale-110"
-            : "hover:bg-purple-50 hover:scale-105"
-            }`} >
-          <Bookmark
-            size={24}
-            fill={isSaved ? "currentColor" : "none"}
-            className={isSaved ? "text-yellow-500" : "text-gray-700 group-hover:text-purple-600"}
-            strokeWidth={2}
-          />
-        </button>
       </div>
 
       {/* Caption & Likes */}
-      <div className="px-5 py-3 space-y-2">
+      <div className="card-body p-5 pt-0">
         <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-400 to-pink-500 border-2 border-white" />
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 border-2 border-white" />
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-yellow-500 border-2 border-white" />
+          <div className="avatar-group -space-x-2">
+            <div className="avatar placeholder">
+              <div className="bg-red-400 text-white rounded-full w-6">
+                <span className="text-xs">+</span>
+              </div>
+            </div>
+            <div className="avatar placeholder">
+              <div className="bg-blue-400 text-white rounded-full w-6">
+                <span className="text-xs">+</span>
+              </div>
+            </div>
+            <div className="avatar placeholder">
+              <div className="bg-yellow-400 text-white rounded-full w-6">
+                <span className="text-xs">+</span>
+              </div>
+            </div>
           </div>
-          <p className="text-sm font-bold text-gray-800">
-            {likesCount.toLocaleString()} <span className="font-normal text-gray-600">likes</span>
+          <p className="text-sm font-bold text-base-content">
+            {likesCount.toLocaleString()} <span className="font-normal text-base-content/70">likes</span>
           </p>
         </div>
 
         {post?.caption && (
-          <p className="text-sm text-gray-800 leading-relaxed">
-            <Link to={authorId ? `/profile/${authorId}` : "#"} className="font-bold text-purple-600 hover:underline mr-2">
+          <p className="text-sm text-base-content leading-relaxed">
+            <Link to={authorId ? `/profile/${authorId}` : "#"} className="font-bold text-primary hover:underline mr-2">
               {username}
             </Link>
             {post.caption}
@@ -255,84 +266,86 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
       {/* Comments Section */}
       {open && (
         <div className="mx-4 mb-4">
-          <div className="rounded-2xl border-2 border-purple-100 shadow-lg overflow-hidden bg-gradient-to-br from-white to-purple-50/20">
-            <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600">
-              <p className="text-sm font-bold text-white">Comments</p>
-              <span className="text-xs font-semibold px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full">
-                {commentCount}
-              </span>
-            </div>
-
-            <div className="max-h-72 overflow-y-auto bg-white">
-              {loading ? (
-                <div className="p-6 text-center">
-                  <div className="inline-block w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                  <p className="text-sm text-gray-500 mt-2">Loading comments...</p>
+          <div className="card bg-base-100 shadow-lg border border-base-200">
+            <div className="card-body p-0">
+              <div className="bg-primary text-primary-content px-5 py-3 flex items-center justify-between">
+                <p className="text-sm font-bold">Comments</p>
+                <div className="badge badge-primary badge-sm">
+                  {commentCount}
                 </div>
-              ) : comments.length === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle size={28} className="text-purple-600" />
-                  </div>
-                  <p className="text-sm text-gray-500 font-medium">Be the first to comment!</p>
-                </div>
-              ) : (
-                comments.map((c, idx) => (
-                  <div
-                    key={c._id}
-                    className={`px-5 py-4 flex items-start gap-3 hover:bg-purple-50/50 transition-colors ${idx !== comments.length - 1 ? "border-b border-gray-100" : ""
-                      }`}
-                  >
-                    <div className="relative group">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-0 group-hover:opacity-100 blur transition-opacity" />
-                      <img
-                        src={c.user?.profilePicture || "/user.png"}
-                        alt={c.user?.username || "User"}
-                        className="relative w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
-                      />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-gradient-to-br from-gray-50 to-purple-50/30 rounded-2xl px-4 py-2.5">
-                        <p className="text-sm font-bold text-gray-900 mb-1">
-                          {c.user?.username || "User"}
-                        </p>
-                        <p className="text-sm text-gray-700 leading-relaxed">{c.text}</p>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1.5 ml-4 font-medium">
-                        {c.createdAt ? formatTimeAgo(c.createdAt) : ""}
-                      </p>
-                    </div>
-
-                    {user?._id && c.user && String(c.user._id) === String(user._id) && (
-                      <button
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        onClick={() => deleteComment(c._id)}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-
-            <form onSubmit={addComment} className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50/50 to-pink-50/50 border-t border-purple-100">
-              <div className="flex-1 flex items-center bg-white rounded-2xl px-4 shadow-sm border border-purple-100 focus-within:border-purple-300 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
-                <input
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="flex-1 bg-transparent outline-none text-sm py-3 placeholder:text-gray-400"
-                />
               </div>
-              <button
-                type="submit"
-                className="px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
-              >
-                Post
-              </button>
-            </form>
+
+              <div className="max-h-72 overflow-y-auto">
+                {loading ? (
+                  <div className="p-6 text-center">
+                    <span className="loading loading-spinner loading-md text-primary"></span>
+                    <p className="text-sm text-base-content/60 mt-2">Loading comments...</p>
+                  </div>
+                ) : comments.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <MessageCircle size={28} className="text-base-content/60" />
+                    </div>
+                    <p className="text-sm text-base-content/60 font-medium">Be the first to comment!</p>
+                  </div>
+                ) : (
+                  comments.map((c, idx) => (
+                    <div
+                      key={c._id}
+                      className={`p-5 flex items-start gap-3 hover:bg-base-200/50 transition-colors ${idx !== comments.length - 1 ? "border-b border-base-200" : ""}`}
+                    >
+                      <div className="avatar placeholder">
+                        <div className="bg-neutral text-neutral-content rounded-full w-8">
+                          <img
+                            src={c.user?.profilePicture || "/user.png"}
+                            alt={c.user?.username || "User"}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-base-200 rounded-2xl px-4 py-2.5">
+                          <p className="text-sm font-bold text-base-content mb-1">
+                            {c.user?.username || "User"}
+                          </p>
+                          <p className="text-sm text-base-content leading-relaxed">{c.text}</p>
+                        </div>
+                        <p className="text-xs text-base-content/50 mt-1.5 ml-4 font-medium">
+                          {c.createdAt ? formatTimeAgo(c.createdAt) : ""}
+                        </p>
+                      </div>
+
+                      {user?._id && c.user && String(c.user._id) === String(user._id) && (
+                        <button
+                          className="btn btn-ghost btn-sm text-error hover:bg-error/10"
+                          onClick={() => deleteComment(c._id)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <form onSubmit={addComment} className="p-4 bg-base-200/50 border-t border-base-200">
+                <div className="join w-full">
+                  <input
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="input input-bordered join-item flex-1 bg-base-100"
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-primary join-item"
+                  >
+                    Post
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

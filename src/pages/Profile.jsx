@@ -9,8 +9,9 @@ import EditPostModal from "../components/post/EditPostModal.jsx";
 import PostCard from "../components/post/PostCard.jsx";
 import ReelCard from "../components/reel/ReelCard.jsx";
 import { userAuth } from "../context/AuthContext";
+
 export default function Profile() {
-  const { user, login, logout } = userAuth();
+  const { user, login, logout, token } = userAuth();
   const [profile, setProfile] = useState({
     username: "",
     email: "",
@@ -22,6 +23,7 @@ export default function Profile() {
   const [posts, setPosts] = useState([]);
   const [reels, setReels] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
+  const [savedPosts, setSavedPosts] = useState(new Set());
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [profileImageFile, setProfileImageFile] = useState(null);
@@ -37,7 +39,7 @@ export default function Profile() {
         setLoading(true);
         const { data } = await api.get("/user/profile");
         setProfile(data);
-        login(data, localStorage.getItem("token"));
+        login(data, token);
       } catch (err) {
         console.log("Profile fetch failed:", err.message);
       } finally {
@@ -73,36 +75,53 @@ export default function Profile() {
     setProfile((prev) => {
       if (!prev?._id) return prev;
       if (String(prev._id) !== String(user._id)) return prev;
-      const next = {
+      return {
         ...prev,
         followers: Array.isArray(user.followers) ? user.followers : prev.followers,
         following: Array.isArray(user.following) ? user.following : prev.following,
       };
-      return next;
     });
-  }, [user?._id, Array.isArray(user?.followers) ? user.followers.length : 0, Array.isArray(user?.following) ? user.following.length : 0]);
-
+  }, [user?._id, user?.followers?.length, user?.following?.length]);
+  
   useEffect(() => {
-    if (!user?._id) return;
-    const fetchFresh = async () => {
-      try {
-        const { data } = await api.get("/user/profile");
-        setProfile(data);
-        login(data, localStorage.getItem("token"));
-      } catch {
-        // Ignore errors
+    if (user?.savedPosts) {
+      setSavedPosts(new Set(user.savedPosts.map(p => typeof p === 'object' ? p._id : p)));
+    }
+  }, [user?.savedPosts]);
+
+  const toggleSave = async (postId) => {
+    const isSaved = savedPosts.has(postId);
+    setSavedPosts((prev) => {
+      const newSet = new Set(prev);
+      if (isSaved) newSet.delete(postId);
+      else newSet.add(postId);
+      return newSet;
+    });
+
+    try {
+      const { data } = await api.post(`/post/${postId}/save`);
+      if (data.type === "saved") {
+          toast.success("Post saved to Saved Tab ✔️");
+      } else {
+          toast.success("Post removed from saved");
       }
-    };
-    fetchFresh();
-  }, [Array.isArray(user?.following) ? user.following.length : 0]);
+    } catch (err) {
+      console.error("Save toggle failed", err);
+      toast.error("Failed to save post");
+      setSavedPosts((prev) => {
+        const newSet = new Set(prev);
+        if (isSaved) newSet.add(postId);
+        else newSet.delete(postId);
+        return newSet;
+      });
+    }
+  };
 
   const refreshPosts = async () => {
     try {
       const { data } = await api.get("/post");
       setPosts(data?.posts || []);
-    } catch {
-      // Ignore errors
-    }
+    } catch (err) {}
   };
 
   const handleDeletePost = async (postId) => {
@@ -126,7 +145,6 @@ export default function Profile() {
       await api.delete(`/reel/delete/${reelId}`);
       const { data: reelsData } = await api.get("/reel/all");
       setReels(reelsData?.reels || []);
-      await refreshPosts();
       toast.success("Reel deleted successfully!");
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to delete reel");
@@ -134,6 +152,7 @@ export default function Profile() {
       setDeleting(false);
     }
   };
+
   const handleUpdatePost = (post) => {
     setEditingPost(post);
     setShowEditModal(true);
@@ -145,7 +164,7 @@ export default function Profile() {
       await api.put(`/post/update/${editingPost._id}`, { caption });
       await refreshPosts();
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to update post");
+      toast.error(err?.response?.data?.message || "Failed to update post");
       throw err;
     } finally {
       setUpdating(false);
@@ -180,13 +199,11 @@ export default function Profile() {
       };
 
       setProfile(updatedProfile);
-      login(updatedProfile, localStorage.getItem("token"));
+      login(updatedProfile, token);
       toast.success("Profile updated!");
-
       setProfileImageFile(null);
       setPreview("");
     } catch (err) {
-      console.error("Profile update error:", err);
       toast.error(err.response?.data?.message || "Failed to update profile");
     } finally {
       setSaving(false);
@@ -195,14 +212,16 @@ export default function Profile() {
 
   if (loading) return <div className="max-w-2xl mx-auto p-6"><Layout /></div>;
 
-  const followersArr = Array.isArray(user?.followers) ? user.followers : (Array.isArray(profile.followers) ? profile.followers : []);
-  const followingArr = Array.isArray(user?.following) ? user.following : (Array.isArray(profile.following) ? profile.following : []);
+  const followersArr = Array.isArray(user?.followers) ? user.followers : (profile.followers || []);
+  const followingArr = Array.isArray(user?.following) ? user.following : (profile.following || []);
 
   const myPosts = posts.filter((p) => {
     const uid = p?.userId?._id || p?.userId || p?.userID?._id || p?.userID;
     const me = profile?._id || user?._id;
     return uid && me && String(uid) === String(me);
   });
+
+  const mySavedPosts = posts.filter((p) => savedPosts.has(p._id || p.id));
 
   const myReels = reels.filter((r) => {
     const uid = r?.userId?._id || r?.userId;
@@ -211,7 +230,7 @@ export default function Profile() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 pb-24 lg:pb-8 lg:ml-64 xl:mr-80">
+    <div className="min-h-screen bg-base-200 pb-24 lg:pb-8 lg:ml-64 xl:mr-80 transition-colors duration-300">
       <FollowListModal
         isOpen={showFollowModal}
         onClose={() => setShowFollowModal(false)}
@@ -229,92 +248,73 @@ export default function Profile() {
         post={editingPost}
         onSave={handleSavePostEdit}
       />
-      {/* Decorative background elements */}
-
 
       <div className="relative max-w-2xl mx-auto px-4 py-6">
         {/* Profile Header Card */}
-        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-white/50 overflow-hidden">
-          {/* Top Section with Avatar and Quick Actions */}
+        <div className="bg-base-100 rounded-3xl shadow-xl border border-base-300 overflow-hidden">
           <div className="p-8">
-            <div className="flex items-start gap-6">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               {/* Avatar */}
-              <div className="relative flex-shrink-0 group">
+              <div className="relative flex-shrink-0">
                 <img
                   src={preview || profile.profilePicture || "/user.png"}
                   alt="avatar"
-                  className="relative w-28 h-28 rounded-full border-4 border-white object-cover shadow-xl"
+                  className="w-28 h-28 rounded-full border-4 border-base-100 object-cover shadow-xl bg-base-300"
                 />
               </div>
 
               {/* Profile Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
-
+              <div className="flex-1 min-w-0 text-center md:text-left">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                   <div className="flex-1 min-w-0">
-                    <h1 className="
-  text-xl sm:text-2xl 
-  font-black 
-  bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 
-  bg-clip-text text-transparent
-  break-words
-">
+                    <h1 className="text-2xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent break-words">
                       {profile.username}
                     </h1>
-                    <p className="text-gray-500 text-xs sm:text-sm break-all">
+                    <p className="text-base-content/60 text-sm break-all">
                       {profile.email}
                     </p>
                   </div>
 
-                  {/* Create Story Button */}
                   <Link
                     to="/create-story"
-                    className="flex-shrink-0 group relative px-4 py-2.5 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="flex-shrink-0 group relative px-6 py-2.5 rounded-full overflow-hidden shadow-lg hover:shadow-xl transition-all"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400"></div>
                     <span className="relative flex items-center gap-2 text-white font-bold text-sm">
-                      <BookHeart size={16} strokeWidth={2} />
+                      <BookHeart size={16} />
                       Create Story
                     </span>
                   </Link>
                 </div>
 
-                {/* Bio */}
                 {profile.bio && (
-                  <div className="mb-4 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-xl p-3 border border-purple-100/50">
-                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">{profile.bio}</p>
+                  <div className="mb-4 bg-base-200 rounded-xl p-3 border border-base-300">
+                    <p className="text-base-content/80 text-sm leading-relaxed">{profile.bio}</p>
                   </div>
                 )}
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
+                <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => {
-                      setFollowModalType("followers");
-                      setShowFollowModal(true);
-                    }}
-                    className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-3 hover:from-purple-100 hover:to-purple-200/50 transition-all"
+                    onClick={() => { setFollowModalType("followers"); setShowFollowModal(true); }}
+                    className="bg-base-200 rounded-xl p-3 hover:bg-base-300 transition-all border border-base-300"
                   >
-                    <div className="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <div className="text-xl font-black text-base-content">
                       {followersArr.length}
                     </div>
-                    <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">
+                    <div className="text-[10px] text-base-content/50 font-bold uppercase tracking-widest">
                       Followers
                     </div>
                   </button>
 
                   <button
-                    onClick={() => {
-                      setFollowModalType("following");
-                      setShowFollowModal(true);
-                    }}
-                    className="bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-xl p-3 hover:from-pink-100 hover:to-pink-200/50 transition-all"
+                    onClick={() => { setFollowModalType("following"); setShowFollowModal(true); }}
+                    className="bg-base-200 rounded-xl p-3 hover:bg-base-300 transition-all border border-base-300"
                   >
-                    <div className="text-2xl sm:text-sm font-black bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">
+                    <div className="text-xl font-black text-base-content">
                       {followingArr.length}
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 font-semibold uppercase tracking-wide">
+                    <div className="text-[10px] text-base-content/50 font-bold uppercase tracking-widest">
                       Following
                     </div>
                   </button>
@@ -324,12 +324,11 @@ export default function Profile() {
           </div>
 
           {/* Edit Profile Form */}
-          <form onSubmit={handleSave} className="border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white p-6 space-y-4">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Edit Profile</h3>
+          <form onSubmit={handleSave} className="border-t border-base-300 bg-base-100/50 p-6 space-y-4">
+            <h3 className="text-xs font-bold text-base-content/50 uppercase tracking-widest mb-2">Settings</h3>
 
-            {/* Profile Picture Upload */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Profile Picture</label>
+              <label className="block text-xs font-bold text-base-content/70 mb-2 ml-1">Profile Picture</label>
               <input
                 type="file"
                 accept="image/*"
@@ -337,38 +336,32 @@ export default function Profile() {
                   const f = e.target.files?.[0];
                   if (f) {
                     setProfileImageFile(f);
-                    try {
-                      setPreview(URL.createObjectURL(f));
-                    } catch {
-                      setPreview("");
-                    }
+                    setPreview(URL.createObjectURL(f));
                   }
                 }}
-                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 file:cursor-pointer cursor-pointer"
+                className="file-input file-input-bordered file-input-primary file-input-sm w-full"
               />
             </div>
 
-            {/* Username */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+              <label className="block text-xs font-bold text-base-content/70 mb-2 ml-1">Username</label>
               <input
                 name="username"
                 value={profile.username}
                 onChange={handleChange}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none"
+                className="input input-bordered w-full text-sm focus:ring-2 focus:ring-primary/20"
                 placeholder="Enter your username"
               />
             </div>
 
-            {/* Bio */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
+              <label className="block text-xs font-bold text-base-content/70 mb-2 ml-1">Bio</label>
               <textarea
                 name="bio"
                 value={profile.bio}
                 onChange={handleChange}
                 rows="3"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none"
+                className="textarea textarea-bordered w-full text-sm resize-none focus:ring-2 focus:ring-primary/20"
                 placeholder="Tell us about yourself..."
               />
             </div>
@@ -378,16 +371,14 @@ export default function Profile() {
               <button
                 type="submit"
                 disabled={saving}
-                className="relative px-5 py-2.5 rounded-xl font-bold text-white overflow-hidden shadow-lg hover:shadow-xl disabled:opacity-60 transition-all group"
+                className="btn btn-primary btn-sm h-11 text-white shadow-lg"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span className="relative text-sm">{saving ? "Saving..." : "Save"}</span>
+                {saving ? "Saving..." : "Save Changes"}
               </button>
 
               <Link
                 to="/create-post"
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold shadow-lg hover:shadow-xl transition-all text-center text-sm"
+                className="btn btn-success btn-sm h-11 text-white shadow-lg"
               >
                 New Post
               </Link>
@@ -395,7 +386,7 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={logout}
-                className="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold transition-all text-sm"
+                className="btn btn-ghost btn-sm h-11 bg-base-300 hover:bg-error/20 hover:text-error"
               >
                 Logout
               </button>
@@ -404,148 +395,115 @@ export default function Profile() {
         </div>
 
         {/* Tabs */}
-        <div className="mt-6 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden">
+        <div className="mt-6 bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden">
           <div className="grid grid-cols-3">
-            <button
-              onClick={() => setActiveTab("posts")}
-              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${activeTab === "posts" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
+            {[
+              { id: "posts", icon: Grid, label: "Posts" },
+              { id: "reels", icon: Film, label: "Reels" },
+              { id: "saved", icon: Bookmark, label: "Saved" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${
+                  activeTab === tab.id ? "text-primary" : "text-base-content/40 hover:text-base-content/70"
                 }`}
-            >
-              {activeTab === "posts" && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
-              )}
-              <Grid size={20} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Posts</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("reels")}
-              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${activeTab === "reels" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
-                }`}
-            >
-              {activeTab === "reels" && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
-              )}
-              <Film size={20} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Reels</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("saved")}
-              className={`relative py-4 flex items-center justify-center gap-2 font-semibold transition-all ${activeTab === "saved" ? "text-purple-600" : "text-gray-400 hover:text-gray-600"
-                }`}
-            >
-              {activeTab === "saved" && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-500"></div>
-              )}
-              <Bookmark size={20} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Saved</span>
-            </button>
+              >
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary"></div>
+                )}
+                <tab.icon size={20} />
+                <span className="hidden sm:inline text-sm">{tab.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="mt-6 space-y-4">
-          {/* Posts Tab */}
+        <div className="mt-6 space-y-6">
           {activeTab === "posts" && (
-            <>
-              {myPosts.length === 0 ? (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-16 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Grid size={32} className="text-purple-600" strokeWidth={2} />
+            myPosts.length === 0 ? (
+              <EmptyState icon={Grid} label="No posts yet" sub="Start sharing your moments!" link="/create-post" btn="Create Post" />
+            ) : (
+              myPosts.map((post) => {
+                const id = post._id || post.id;
+                const isLiked = Array.isArray(post.likes) && user?._id ? post.likes.map(String).includes(String(user._id)) : false;
+                return (
+                  <div key={id} className="bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden mb-6">
+                    <PostCard 
+                      post={post} 
+                      isLiked={isLiked} 
+                      isSaved={savedPosts.has(id)} 
+                      onLike={() => { /* Optional: add full like toggle later */ }} 
+                      onSave={() => toggleSave(id)} 
+                    />
+                  <div className="flex gap-4 px-6 py-3 bg-base-200/50 border-t border-base-300">
+                    <button onClick={() => handleUpdatePost(post)} className="flex items-center gap-2 text-sm text-info hover:underline font-bold">
+                      <Pencil size={16} /> Edit
+                    </button>
+                    <button onClick={() => handleDeletePost(post._id)} className="flex items-center gap-2 text-sm text-error hover:underline font-bold">
+                      <Trash2 size={16} /> Delete
+                    </button>
                   </div>
-                  <p className="text-gray-600 font-semibold text-lg">No posts yet</p>
-                  <p className="text-gray-400 text-sm mt-1">Start sharing your moments!</p>
-                  <Link
-                    to="/create-post"
-                    className="inline-block mt-4 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all text-sm"
-                  >
-                    Create Your First Post
-                  </Link>
                 </div>
-              ) : (
-                myPosts.map((post) => {
-                  const isOwner = String(post?.userId?._id || post?.userId || post?.userID?._id || post?.userID) === String(profile?._id || user?._id);
-                  return (
-                    <div
-                      key={post._id}
-                      className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden"
-                    >
-                      <PostCard post={post} isLiked={false} isSaved={false} onLike={() => { }} onSave={() => { }} />
-                      {isOwner && (
-                        <div className="flex gap-4 px-6 py-3 bg-gradient-to-r from-gray-50/80 to-purple-50/30 border-t border-gray-100">
-                          <button
-                            onClick={() => handleUpdatePost(post)}
-                            disabled={updating}
-                            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-semibold transition-colors disabled:opacity-50"
-                          >
-                            <Pencil size={16} /> Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeletePost(post._id)}
-                            disabled={deleting}
-                            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-semibold transition-colors disabled:opacity-50"
-                          >
-                            <Trash2 size={16} /> Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </>
+              );
+            })
+          )
           )}
 
-          {/* Reels Tab */}
           {activeTab === "reels" && (
-            <>
-              {myReels.length === 0 ? (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-16 text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Film size={32} className="text-purple-600" strokeWidth={2} />
-                  </div>
-                  <p className="text-gray-600 font-semibold text-lg">No reels yet</p>
-                  <p className="text-gray-400 text-sm mt-1">Create your first reel!</p>
-                  <Link
-                    to="/create-reel"
-                    className="inline-block mt-4 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all text-sm"
-                  >
-                    Create Your First Reel
-                  </Link>
+            myReels.length === 0 ? (
+              <EmptyState icon={Film} label="No reels yet" sub="Create your first reel!" link="/create-reel" btn="Create Reel" />
+            ) : (
+              <div className="bg-base-100 rounded-2xl shadow-lg border border-base-300 p-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {myReels.map((reel) => (
+                    <ReelCard key={reel._id} reel={reel} showDelete={true} onDelete={handleDeleteReel} onClick={() => window.location.href = `/reels`} />
+                  ))}
                 </div>
-              ) : (
-                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 p-4">
-                  <div className="grid grid-cols-3 gap-2">
-                    {myReels.map((reel) => (
-                      <ReelCard
-                        key={reel._id}
-                        reel={reel}
-                        showDelete={true}
-                        onDelete={handleDeleteReel}
-                        onClick={() => {
-                          window.location.href = `/reels`;
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+              </div>
+            )
           )}
 
-          {/* Saved Tab */}
           {activeTab === "saved" && (
-            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-white/50 p-16 text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Bookmark size={32} className="text-purple-600" strokeWidth={2} />
-              </div>
-              <p className="text-gray-600 font-semibold text-lg">No saved posts yet</p>
-              <p className="text-gray-400 text-sm mt-1">Save posts to see them here!</p>
-            </div>
+            mySavedPosts.length === 0 ? (
+              <EmptyState icon={Bookmark} label="No saved posts yet" sub="Save posts to see them here!" />
+            ) : (
+              mySavedPosts.map((post) => {
+                const id = post._id || post.id;
+                const isLiked = Array.isArray(post.likes) && user?._id ? post.likes.map(String).includes(String(user._id)) : false;
+                return (
+                  <div key={id} className="bg-base-100 rounded-2xl shadow-lg border border-base-300 overflow-hidden mb-6">
+                    <PostCard 
+                      post={post} 
+                      isLiked={isLiked} 
+                      isSaved={true} 
+                      onLike={() => {}} 
+                      onSave={() => toggleSave(id)} 
+                    />
+                  </div>
+                );
+              })
+            )
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Helper component for Empty States to keep code clean
+function EmptyState({ icon: Icon, label, sub, link, btn }) {
+  return (
+    <div className="bg-base-100 rounded-3xl shadow-lg border border-base-300 p-16 text-center">
+      <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+        <Icon size={32} />
+      </div>
+      <p className="text-base-content font-bold text-lg">{label}</p>
+      <p className="text-base-content/50 text-sm mt-1">{sub}</p>
+      {link && (
+        <Link to={link} className="btn btn-primary btn-sm mt-6 rounded-full px-8">{btn}</Link>
+      )}
     </div>
   );
 }

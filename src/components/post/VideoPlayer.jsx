@@ -5,7 +5,7 @@ import {
   Volume2, VolumeX
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-
+import { optimizeCloudinaryVideo } from "../../utils/optimizeMedia.js";
 
 export default function VideoPlayer({ src, className = "", poster = "" }) {
   const videoRef = useRef(null);
@@ -247,13 +247,16 @@ export default function VideoPlayer({ src, className = "", poster = "" }) {
     >
       <video
         ref={videoRef}
-        src={src}
+        src={optimizeCloudinaryVideo(src)}
         poster={poster}
         // UPDATE 2: Changed to 'object-contain'
         // This ensures the full video is always seen, adding black bars if needed
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain pointer-events-none"
         muted={isMuted}
         playsInline
+        controlsList="nodownload noplaybackrate"
+        disablePictureInPicture
+        onContextMenu={(e) => e.preventDefault()}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
         onClick={togglePlayPause}

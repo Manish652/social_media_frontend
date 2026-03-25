@@ -9,13 +9,12 @@ export default function InputField({
   ...props
 }) {
   return (
-    <div className="flex flex-col mb-4">
-      <label
-        className="text-sm font-semibold text-gray-700 mb-2"
-        htmlFor={name}
-      >
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+    <div className="form-control mb-4">
+      <label className="label">
+        <span className="label-text font-semibold">
+          {label}
+          {required && <span className="text-error ml-1">*</span>}
+        </span>
       </label>
 
       <input
@@ -25,8 +24,8 @@ export default function InputField({
         value={type === "file" ? undefined : value}
         onChange={onChange}
         placeholder={placeholder}
-        required={required}   
-        className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all"
+        required={required}
+        className="input input-bordered focus:input-primary"
         {...props}
       />
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import api from "../api/axios.js";
 import Skaliton from "../components/layout/Skaliton.jsx";
 import PostCard from "../components/post/PostCard.jsx";
@@ -10,10 +11,17 @@ export default function Home() {
   const navigate = useNavigate();
 
   const [likedPosts, setLikedPosts] = useState(new Set());
-  const [savedPosts, setSavedPosts] = useState(new Set());
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user } = userAuth();
+  
+  const [savedPosts, setSavedPosts] = useState(new Set());
+
+  useEffect(() => {
+    if (user?.savedPosts) {
+      setSavedPosts(new Set(user.savedPosts.map(p => typeof p === 'object' ? p._id : p)));
+    }
+  }, [user?.savedPosts]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -72,19 +80,40 @@ export default function Home() {
     }
   };
 
-  const toggleSave = (postId) => {
+  const toggleSave = async (postId) => {
+    // optimistic UI
+    const isSaved = savedPosts.has(postId);
     setSavedPosts((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(postId)) newSet.delete(postId);
+      if (isSaved) newSet.delete(postId);
       else newSet.add(postId);
       return newSet;
     });
+
+    try {
+      const { data } = await api.post(`/post/${postId}/save`);
+      if (data.type === "saved") {
+          toast.success("Post saved to Saved Tab ✔️");
+      } else {
+          toast.success("Post removed from saved");
+      }
+    } catch (err) {
+      console.error("Save toggle failed", err);
+      toast.error("Failed to save post");
+      // Revert if error
+      setSavedPosts((prev) => {
+        const newSet = new Set(prev);
+        if (isSaved) newSet.add(postId);
+        else newSet.delete(postId);
+        return newSet;
+      });
+    }
   };
 
   return (
     <>
       {/* Main Content - Centered with sidebars on desktop */}
-      <div className="min-h-screen pb-24 lg:pb-8 bg-[#fafafa] lg:ml-64 xl:mr-80">
+      <div className="min-h-screen pb-24 lg:pb-8 bg-base-200 lg:ml-64 xl:mr-80">
         {/* Stories Section */}
         <StoriesSection showCreateButton={false} />
 
@@ -98,7 +127,7 @@ export default function Home() {
             </div>
           )}
           {!loading && posts.length === 0 && (
-            <div className="text-center py-8 text-gray-500">No posts yet</div>
+            <div className="text-center py-8 text-base-content/60">No posts yet</div>
           )}
           {posts.map((post) => {
             const id = post._id || post.id;

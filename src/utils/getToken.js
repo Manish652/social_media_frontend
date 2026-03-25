@@ -1,7 +1,9 @@
+let memoryToken = null;
+
+export const setToken = (token) => {
+  memoryToken = token;
+};
+
 export default function getToken() {
-  try {
-    return localStorage.getItem("token");
-  } catch {
-    return null;
-  }
+  return memoryToken;
 }

@@ -144,10 +144,10 @@ export default function ProfilePublicView() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center border">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-gray-400 text-2xl">👤</span>
+      <div className="min-h-screen bg-base-100 flex items-center justify-center p-6">
+        <div className="bg-base-100 rounded-3xl shadow-xl p-8 max-w-md text-center border border-base-300">
+          <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-base-content/40 text-2xl">👤</span>
           </div>
           <p className="text-gray-600 font-semibold">Profile not found</p>
         </div>
@@ -290,7 +290,7 @@ export default function ProfilePublicView() {
 
                 {/* Bio */}
                 {profile.bio && (
-                  <div className="mb-6 bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-2xl p-4 border border-purple-100/50">
+                  <div className="mb-6 bg-base-200/50 rounded-2xl p-4 border border-base-300/50">
                     <p className="text-gray-700 text-sm leading-relaxed">
                       {profile.bio}
                     </p>
@@ -412,7 +412,7 @@ export default function ProfilePublicView() {
                     {posts.map((post) => (
                       <div
                         key={post._id}
-                        className="p-6 hover:bg-gradient-to-r hover:from-purple-50/30 hover:to-pink-50/30 transition-all duration-200"
+                        className="p-6 hover:bg-base-200 transition-all duration-200"
                       >
                         <PostCard
                           post={post}

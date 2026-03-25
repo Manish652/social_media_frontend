@@ -15,13 +15,14 @@ export default function Signup() {
     bio: "",
     profilePicture: null
   });
+  const [step, setStep] = useState(1);
+  const [otp, setOtp] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const navigate = useNavigate();
 
-  // Password Strength Logic
   const passwordStrength = useMemo(() => {
     const pass = formData.password;
     if (!pass) return 0;
@@ -46,7 +47,22 @@ export default function Signup() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    try {
+      await api.post("/user/send-otp", { email: formData.email });
+      toast.success("OTP sent to your email!");
+      setStep(2);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
@@ -64,6 +80,7 @@ export default function Signup() {
         password: formData.password,
         bio: formData.bio,
         profilePictureUrl: profilePictureUrl,
+        otp: otp,
       });
 
       toast.success("Welcome to the community!");
@@ -79,11 +96,11 @@ export default function Signup() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
-        
+
         {/* Left Side - Enhanced Form */}
         <div className="w-full lg:w-auto max-w-md animate-fadeInLeft">
-          <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-2xl border border-white/50 p-6 sm:p-10 relative overflow-hidden">
-            
+          <div className="bg-base-100/70 backdrop-blur-md rounded-3xl shadow-2xl border border-base-300/50 p-6 sm:p-10 relative overflow-hidden">
+
             {/* Live Profile Preview Circle */}
             <div className="flex flex-col items-center mb-6">
               <div className="relative group cursor-pointer">
@@ -105,14 +122,16 @@ export default function Signup() {
               <h2 className="mt-4 text-2xl font-bold text-gray-800">@{formData.username || "username"}</h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={step === 1 ? handleSendOtp : handleRegister} className="space-y-4">
+              {step === 1 ? (
+                <>
               {/* Username Input */}
               <div className="relative group">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
                 <input
                   name="username"
                   placeholder="Username"
-                  className="w-full pl-10 pr-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
                   onChange={handleChange}
                   required
                 />
@@ -120,12 +139,12 @@ export default function Signup() {
 
               {/* Email Input */}
               <div className="relative group">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
                 <input
                   type="email"
                   name="email"
                   placeholder="Email Address"
-                  className="w-full pl-10 pr-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
                   onChange={handleChange}
                   required
                 />
@@ -133,30 +152,29 @@ export default function Signup() {
 
               {/* Password Input with Strength Meter */}
               <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Create Password"
-                  className="w-full pl-10 pr-12 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                  className="w-full pl-10 pr-12 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
                   onChange={handleChange}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
                 >
                   {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
                 {/* Strength Bar */}
                 <div className="flex gap-1 mt-2 px-1">
                   {[...Array(4)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                        i < passwordStrength ? (passwordStrength <= 2 ? 'bg-orange-400' : 'bg-green-500') : 'bg-gray-200'
-                      }`} 
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition-all duration-500 ${i < passwordStrength ? (passwordStrength <= 2 ? 'bg-orange-400' : 'bg-green-500') : 'bg-gray-200'
+                        }`}
                     />
                   ))}
                 </div>
@@ -164,15 +182,42 @@ export default function Signup() {
 
               {/* Bio Input */}
               <div className="relative group">
-                <FileText className="absolute left-3 top-3 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} />
+                <FileText className="absolute left-3 top-3 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
                 <textarea
                   name="bio"
                   placeholder="Tell us your story..."
                   rows="2"
-                  className="w-full pl-10 pr-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all resize-none"
+                  className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
                   onChange={handleChange}
                 />
               </div>
+              </>
+              ) : (
+                <div className="space-y-4 animate-fadeIn">
+                  <div className="relative group">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
+                    <input
+                      type="text"
+                      name="otp"
+                      placeholder="Enter 6-digit OTP"
+                      className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <p className="text-sm text-center text-gray-500">
+                    We sent an OTP to {formData.email}. It is valid for 10 minutes.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="w-full bg-base-200 text-base-content font-semibold py-3 rounded-xl hover:bg-base-300 transition-colors"
+                  >
+                    Back to Details
+                  </button>
+                </div>
+              )}
 
               {uploadProgress && (
                 <div className="text-xs text-center font-medium text-purple-600 animate-pulse">
@@ -185,7 +230,7 @@ export default function Signup() {
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-purple-200 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
               >
-                {loading ? "Joining..." : "Get Started"}
+                {loading ? "Processing..." : step === 1 ? "Send OTP" : "Complete Signup"}
               </button>
             </form>
 
