@@ -1,11 +1,10 @@
-
 import { Navigate } from "react-router-dom";
 import { userAuth } from "../../context/AuthContext.jsx";
 import getToken from "../../utils/getToken.js";
 
 function PublicRoute({ children }) {
   const { token, loading } = userAuth() || {};
-  if (loading) return null; // or a loader
+  if (loading) return children; 
   const hasToken = token || getToken();
   if (hasToken) {
     return <Navigate to="/" replace />;
@@ -14,3 +13,5 @@ function PublicRoute({ children }) {
 }
 
 export default PublicRoute;
+
+

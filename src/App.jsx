@@ -1,6 +1,7 @@
 import { Toaster } from "react-hot-toast";
 import { Route, Routes, useLocation } from "react-router-dom";
 import './App.css';
+import About from "./pages/About.jsx";
 import BottomTab from "./components/common/BottomNav.jsx";
 import Navbar from './components/common/Navbar.jsx';
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
@@ -34,6 +35,9 @@ function App() {
       {!hideLayout && token && <LeftSidebar />}
       {!hideLayout && token && <RightSidebar />}
       <Routes>
+
+        <Route path='/about' element={<About/>}  />
+
 
         <Route
           path='/'
@@ -157,3 +161,5 @@ function App() {
 }
 
 export default App;
+
+

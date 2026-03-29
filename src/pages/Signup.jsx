@@ -5,7 +5,7 @@ import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import toast from "react-hot-toast";
 import Lottie from "lottie-react";
 import animetion from "../assets/animations/Social Networking.json";
-import { Eye, EyeOff, Mail, Lock, User, FileText, Camera, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, FileText, Camera, Sparkles, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -40,7 +40,7 @@ export default function Signup() {
       const file = files[0];
       if (file) {
         setFormData({ ...formData, profilePicture: file });
-        setPreviewUrl(URL.createObjectURL(file)); // Create local preview
+        setPreviewUrl(URL.createObjectURL(file));
       }
     } else {
       setFormData({ ...formData, [name]: value });
@@ -94,169 +94,152 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
+    <div className="h-screen w-full flex bg-base-100 overflow-hidden">
+      
+      {/* Left Side: Form Section */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 md:p-16 relative bg-base-100">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+        
+        <div className="w-full max-w-md z-10 py-10">
+          <div className="mb-8 text-center lg:text-left">
+            <h2 className="text-5xl font-black tracking-tighter mb-3">
+              Join the <span className="text-primary">Vibe.</span>
+            </h2>
+            <p className="text-base-content/60 text-lg font-medium">
+              Create your account to start sharing.
+            </p>
+          </div>
 
-        {/* Left Side - Enhanced Form */}
-        <div className="w-full lg:w-auto max-w-md animate-fadeInLeft">
-          <div className="bg-base-100/70 backdrop-blur-md rounded-3xl shadow-2xl border border-base-300/50 p-6 sm:p-10 relative overflow-hidden">
-
-            {/* Live Profile Preview Circle */}
-            <div className="flex flex-col items-center mb-6">
-              <div className="relative group cursor-pointer">
-                <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 flex items-center justify-center transition-transform group-hover:scale-105">
-                  {previewUrl ? (
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <User size={40} className="text-gray-300" />
-                  )}
-                  <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <Camera className="text-white" size={20} />
-                    <input type="file" name="profilePicture" hidden onChange={handleChange} accept="image/*" />
-                  </label>
-                </div>
-                <div className="absolute -bottom-1 -right-1 bg-indigo-500 text-white p-1.5 rounded-full shadow-md">
-                  <Sparkles size={12} />
-                </div>
+          {/* Profile Picture Upload - Centered */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="relative group cursor-pointer">
+              <div className="w-28 h-28 rounded-3xl rotate-3 group-hover:rotate-0 transition-all duration-500 overflow-hidden bg-base-200 border-4 border-base-100 shadow-2xl flex items-center justify-center">
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover -rotate-3 group-hover:rotate-0 transition-transform duration-500" />
+                ) : (
+                  <User size={48} className="text-base-content/20" />
+                )}
+                <label className="absolute inset-0 bg-primary/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
+                  <Camera className="text-white" size={24} />
+                  <input type="file" name="profilePicture" hidden onChange={handleChange} accept="image/*" />
+                </label>
               </div>
-              <h2 className="mt-4 text-2xl font-bold text-gray-800">@{formData.username || "username"}</h2>
+              <div className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-xl shadow-lg animate-bounce">
+                <Sparkles size={16} />
+              </div>
             </div>
+            {formData.username && <p className="mt-3 font-bold text-primary">@{formData.username}</p>}
+          </div>
 
-            <form onSubmit={step === 1 ? handleSendOtp : handleRegister} className="space-y-4">
-              {step === 1 ? (
-                <>
-              {/* Username Input */}
-              <div className="relative group">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
-                <input
-                  name="username"
-                  placeholder="Username"
-                  className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
-                  onChange={handleChange}
-                  required
-                />
+          <form onSubmit={step === 1 ? handleSendOtp : handleRegister} className="space-y-4">
+            {step === 1 ? (
+              <div className="space-y-4 animate-fadeInLeft">
+                <InputField icon={<User size={20}/>} label="Username">
+                   <input name="username" placeholder="vibe_creator" className="input input-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
+                </InputField>
+
+                <InputField icon={<Mail size={20}/>} label="Email">
+                   <input type="email" name="email" placeholder="you@vibe.com" className="input input-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
+                </InputField>
+
+                <InputField icon={<Lock size={20}/>} label="Password">
+                   <div className="relative">
+                     <input type={showPassword ? "text" : "password"} name="password" placeholder="••••••••" className="input input-bordered w-full pl-12 pr-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
+                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-base-content/30 hover:text-primary transition-colors">
+                       {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                     </button>
+                   </div>
+                   <div className="flex gap-1 mt-2 px-1">
+                     {[...Array(4)].map((_, i) => (
+                       <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${i < passwordStrength ? (passwordStrength <= 2 ? 'bg-warning' : 'bg-success') : 'bg-base-200'}`} />
+                     ))}
+                   </div>
+                </InputField>
+
+                <InputField icon={<FileText size={20}/>} label="Bio">
+                   <textarea name="bio" placeholder="Tell the world your vibe..." rows="2" className="textarea textarea-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all resize-none" onChange={handleChange} />
+                </InputField>
               </div>
+            ) : (
+              <div className="space-y-6 animate-fadeInRight">
+                <div className="bg-primary/5 p-6 rounded-3xl border border-primary/10 text-center">
+                  <ShieldCheck size={48} className="mx-auto text-primary mb-3" />
+                  <h4 className="text-xl font-bold">Verify your Email</h4>
+                  <p className="text-sm text-base-content/60 mt-2">We sent a 6-digit code to <br/><span className="text-primary font-bold">{formData.email}</span></p>
+                </div>
+                
+                <InputField icon={<Lock size={20}/>} label="Enter OTP">
+                  <input type="text" placeholder="000000" className="input input-bordered w-full pl-12 text-center tracking-[1em] text-xl font-bold bg-base-200/40 border-base-content/10 focus:border-primary transition-all" value={otp} onChange={(e) => setOtp(e.target.value)} required maxLength={6} />
+                </InputField>
 
-              {/* Email Input */}
-              <div className="relative group">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              {/* Password Input with Strength Meter */}
-              <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Create Password"
-                  className="w-full pl-10 pr-12 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
-                  onChange={handleChange}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
-                >
-                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                <button type="button" onClick={() => setStep(1)} className="btn btn-ghost w-full gap-2 text-base-content/50 hover:bg-transparent">
+                  <ArrowLeft size={18} /> Edit Details
                 </button>
-                {/* Strength Bar */}
-                <div className="flex gap-1 mt-2 px-1">
-                  {[...Array(4)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-1 flex-1 rounded-full transition-all duration-500 ${i < passwordStrength ? (passwordStrength <= 2 ? 'bg-orange-400' : 'bg-green-500') : 'bg-gray-200'
-                        }`}
-                    />
-                  ))}
-                </div>
               </div>
+            )}
 
-              {/* Bio Input */}
-              <div className="relative group">
-                <FileText className="absolute left-3 top-3 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
-                <textarea
-                  name="bio"
-                  placeholder="Tell us your story..."
-                  rows="2"
-                  className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all resize-none"
-                  onChange={handleChange}
-                />
+            {uploadProgress && (
+              <div className="flex items-center justify-center gap-2 text-primary font-bold animate-pulse text-sm">
+                <span className="loading loading-dots loading-xs"></span> {uploadProgress}
               </div>
-              </>
-              ) : (
-                <div className="space-y-4 animate-fadeIn">
-                  <div className="relative group">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" size={18} />
-                    <input
-                      type="text"
-                      name="otp"
-                      placeholder="Enter 6-digit OTP"
-                      className="w-full pl-10 pr-4 py-3 bg-base-100/50 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <p className="text-sm text-center text-gray-500">
-                    We sent an OTP to {formData.email}. It is valid for 10 minutes.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="w-full bg-base-200 text-base-content font-semibold py-3 rounded-xl hover:bg-base-300 transition-colors"
-                  >
-                    Back to Details
-                  </button>
-                </div>
+            )}
+
+            <button type="submit" disabled={loading} className="btn btn-primary w-full h-16 text-xl font-bold shadow-2xl shadow-primary/30 hover:translate-y-[-2px] transition-all active:scale-95">
+              {loading ? <span className="loading loading-spinner"></span> : (
+                <span className="flex items-center gap-3">
+                  {step === 1 ? "Get OTP" : "Finalize Signup"} <ArrowRight size={24} />
+                </span>
               )}
+            </button>
+          </form>
 
-              {uploadProgress && (
-                <div className="text-xs text-center font-medium text-purple-600 animate-pulse">
-                  {uploadProgress}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-purple-200 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
-              >
-                {loading ? "Processing..." : step === 1 ? "Send OTP" : "Complete Signup"}
-              </button>
-            </form>
-
-            <p className="text-center text-sm mt-6 text-gray-600">
-              Joined us before?{" "}
-              <Link to="/login" className="text-purple-600 font-bold hover:underline">
+          <div className="mt-8 text-center">
+            <p className="text-base-content/50 text-lg">
+              Joined before?{" "}
+              <Link to="/login" className="text-primary font-bold hover:underline underline-offset-8 decoration-2">
                 Login
               </Link>
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Right Side - Animation */}
-        <div className="w-full lg:w-auto max-w-2xl animate-fadeInRight hidden lg:block">
-          <div className="mb-8 flex justify-center">
-            <Lottie animationData={animetion} className="w-full max-w-lg drop-shadow-2xl" />
+      {/* Right Side: Visual Section */}
+      <div className="hidden lg:flex w-1/2 h-full bg-base-200 relative items-center justify-center p-12 overflow-hidden">
+        <div className="absolute top-1/4 left-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] animate-pulse delay-700"></div>
+
+        <div className="max-w-xl w-full flex flex-col items-center z-10">
+          <div className="w-full drop-shadow-[0_35px_35px_rgba(0,0,0,0.15)] mb-10">
+            <Lottie animationData={animetion} className="w-full h-auto transform scale-110" />
           </div>
+
           <div className="text-center">
-            <h3 className="text-4xl font-extrabold text-slate-800 mb-4">
-              Own Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Vibe</span>
+            <h3 className="text-5xl font-black mb-6">
+              Own Your <span className="italic font-serif text-primary">Vibe</span>
             </h3>
-            <p className="text-slate-500 text-lg max-w-md mx-auto">
+            <p className="text-base-content/60 text-xl max-w-sm mx-auto leading-relaxed">
               The only place where your creativity meets its perfect audience.
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Helper Component for consistency
+function InputField({ icon, label, children }) {
+  return (
+    <div className="form-control w-full">
+      <label className="label">
+        <span className="label-text font-bold uppercase tracking-widest text-[10px] opacity-60">{label}</span>
+      </label>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-base-content/30 group-focus-within:text-primary transition-colors">
+          {icon}
+        </div>
+        {children}
       </div>
     </div>
   );

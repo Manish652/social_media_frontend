@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
- const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://social-media-backend-m0n7.onrender.com/api";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://social-media-backend-m0n7.onrender.com/api";
 //const LOCAL_SOCKET_URL = "http://localhost:5000/api";
 
 const socket = io(SOCKET_URL, {

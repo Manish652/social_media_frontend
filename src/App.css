@@ -78,3 +78,21 @@
 .animate-fade-in {
   animation: fade-in 0.5s ease-out;
 }
+
+@layer utilities {
+  .bg-vibe-gradient {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+  }
+
+  .text-vibe-gradient {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Irregular border radius for that organic Vibe feel */
+  .vibe-radius {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+}
