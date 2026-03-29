@@ -36,7 +36,6 @@ function App() {
       {!hideLayout && token && <RightSidebar />}
       <Routes>
 
-        <Route path='/about' element={<About/>}  />
 
 
         <Route
@@ -139,6 +138,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path='/about' element={<PublicRoute><About/></PublicRoute>}  />
+
         <Route
           path='/post/:postId'
           element={
