@@ -29,14 +29,15 @@ export default function Reels() {
   }, []);
 
   useEffect(() => {
-    const currentVideo = videoRefs.current[currentIndex];
+    const refs = videoRefs.current;
+    const currentVideo = refs[currentIndex];
     if (currentVideo) {
       currentVideo.play().catch(err => console.log("Play failed:", err));
       setIsPlaying(true);
     }
 
     return () => {
-      videoRefs.current.forEach(video => {
+      refs.forEach(video => {
         if (video) video.pause();
       });
     };

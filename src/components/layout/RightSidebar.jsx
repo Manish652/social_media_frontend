@@ -2,39 +2,17 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../api/axios.js";
 
+const trendingTags = [
+  { tag: "WebDevelopment", posts: "2.5k" },
+  { tag: "AI", posts: "1.8k" },
+  { tag: "StartupLife", posts: "1.2k" },
+  { tag: "ReactJS", posts: "980" },
+  { tag: "Design", posts: "750" },
+];
+
 export default function RightSidebar() {
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [followingStates, setFollowingStates] = useState({});
-
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      try {
-        const { data } = await api.get("/user/suggestions");
-        setSuggestedUsers(data?.users?.slice(0, 5) || []);
-      } catch (err) {
-        console.error("Failed to load suggestions", err);
-      }
-    };
-    fetchSuggestions();
-  }, []);
-
-  const handleFollow = async (userId) => {
-    try {
-      setFollowingStates((prev) => ({ ...prev, [userId]: true }));
-      await api.post(`/user/${userId}/follow`);
-    } catch (err) {
-      setFollowingStates((prev) => ({ ...prev, [userId]: false }));
-      console.error("Follow failed", err);
-    }
-  };
-
-  const trendingTags = [
-    { tag: "WebDevelopment", posts: "2.5k" },
-    { tag: "AI", posts: "1.8k" },
-    { tag: "StartupLife", posts: "1.2k" },
-    { tag: "ReactJS", posts: "980" },
-    { tag: "Design", posts: "750" },
-  ];
 
   return (
     <aside className="hidden xl:block fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 border-l border-base-300 bg-base-100 overflow-y-auto">
@@ -47,7 +25,7 @@ export default function RightSidebar() {
               See All
             </Link>
           </div>
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             {suggestedUsers.map((user) => (
               <div key={user._id} className="flex items-center gap-3">
                 <Link to={`/u/${user._id}`}>
@@ -78,7 +56,7 @@ export default function RightSidebar() {
                 </button>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
 
         {/* Trending Topics */}

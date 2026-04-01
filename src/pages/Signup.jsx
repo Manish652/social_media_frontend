@@ -135,16 +135,16 @@ export default function Signup() {
             {step === 1 ? (
               <div className="space-y-4 animate-fadeInLeft">
                 <InputField icon={<User size={20}/>} label="Username">
-                   <input name="username" placeholder="vibe_creator" className="input input-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
+                   <input name="username" placeholder="vibe_creator" className="input rounded-4xl  input-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
                 </InputField>
 
                 <InputField icon={<Mail size={20}/>} label="Email">
-                   <input type="email" name="email" placeholder="you@vibe.com" className="input input-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
+                   <input type="email" name="email" placeholder="you@vibe.com" className="input rounded-4xl  input-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
                 </InputField>
 
-                <InputField icon={<Lock size={20}/>} label="Password">
+                <InputField icon={<Lock className="absolute left-4 top-4" size={20}/>} label="Password">
                    <div className="relative">
-                     <input type={showPassword ? "text" : "password"} name="password" placeholder="••••••••" className="input input-bordered w-full pl-12 pr-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
+                     <input type={showPassword ? "text" : "password"} name="password" placeholder="••••••••" className="input rounded-4xl h-13 input-bordered w-full pl-12 pr-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all" onChange={handleChange} required />
                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-base-content/30 hover:text-primary transition-colors">
                        {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                      </button>
@@ -157,7 +157,7 @@ export default function Signup() {
                 </InputField>
 
                 <InputField icon={<FileText size={20}/>} label="Bio">
-                   <textarea name="bio" placeholder="Tell the world your vibe..." rows="2" className="textarea textarea-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all resize-none" onChange={handleChange} />
+                   <textarea name="bio" placeholder="Tell the world your vibe..." rows="2" className="textarea rounded-2xl textarea-bordered w-full pl-12 bg-base-200/40 border-base-content/10 focus:border-primary transition-all resize-none" onChange={handleChange} />
                 </InputField>
               </div>
             ) : (
@@ -169,10 +169,10 @@ export default function Signup() {
                 </div>
                 
                 <InputField icon={<Lock size={20}/>} label="Enter OTP">
-                  <input type="text" placeholder="000000" className="input input-bordered w-full pl-12 text-center tracking-[1em] text-xl font-bold bg-base-200/40 border-base-content/10 focus:border-primary transition-all" value={otp} onChange={(e) => setOtp(e.target.value)} required maxLength={6} />
+                  <input type="text" placeholder="000000" className="input rounded-4xl input-bordered w-full pl-12 text-center tracking-[1em] text-xl font-bold bg-base-200/40 border-base-content/10 focus:border-primary transition-all" value={otp} onChange={(e) => setOtp(e.target.value)} required maxLength={6} />
                 </InputField>
 
-                <button type="button" onClick={() => setStep(1)} className="btn btn-ghost w-full gap-2 text-base-content/50 hover:bg-transparent">
+                <button type="button" onClick={() => setStep(1)} className="btn btn-ghost w-full rounded-4xl gap-2 text-base-content/50 hover:bg-transparent">
                   <ArrowLeft size={18} /> Edit Details
                 </button>
               </div>
@@ -184,7 +184,7 @@ export default function Signup() {
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn btn-primary w-full h-16 text-xl font-bold shadow-2xl shadow-primary/30 hover:translate-y-[-2px] transition-all active:scale-95">
+            <button type="submit" disabled={loading} className="btn btn-primary rounded-4xl w-full h-16 text-xl font-bold shadow-2xl shadow-primary/30 hover:translate-y-[-2px] transition-all active:scale-95">
               {loading ? <span className="loading loading-spinner"></span> : (
                 <span className="flex items-center gap-3">
                   {step === 1 ? "Get OTP" : "Finalize Signup"} <ArrowRight size={24} />

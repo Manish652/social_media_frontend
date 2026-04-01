@@ -2,22 +2,23 @@ import { Bell, Bookmark, Film, Home, MessageCircle, Plus, Search, User, Stamp, C
 import { Link, useLocation } from "react-router-dom";
 import { userAuth } from "../../context/AuthContext.jsx";
 
+const NavItem = ({ to, icon: Icon, label, active }) => (
+  <Link
+    to={to}
+    className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
+      active
+        ? "bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-semibold"
+        : "text-base-content hover:bg-base-200"
+    }`}
+  >
+    <Icon size={24} strokeWidth={active ? 2.5 : 2} />
+    <span className="text-base">{label}</span>
+  </Link>
+);
+
 export default function LeftSidebar() {
   const { pathname } = useLocation();
   const { user } = userAuth();
-
-  const NavItem = ({ to, icon: Icon, label, active }) => (
-    <Link
-      to={to}
-      className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${active
-        ? "bg-gradient-to-r from-primary/10 to-secondary/10 text-primary font-semibold"
-        : "text-base-content hover:bg-base-200"
-        }`}
-    >
-      <Icon size={24} strokeWidth={active ? 2.5 : 2} />
-      <span className="text-base">{label}</span>
-    </Link>
-  );
 
   return (
     <aside className="hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r border-base-300 bg-base-100 overflow-y-auto">

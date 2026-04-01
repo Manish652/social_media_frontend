@@ -2,6 +2,7 @@ import { Image, Type, X } from "lucide-react";
 import { useState } from "react";
 import api from "../../api/axios.js";
 import { getMediaType, uploadToCloudinary } from "../../utils/cloudinaryUpload.js";
+import VibeInputEditor from "../common/VibeInputEditor.jsx";
 
 export default function CreateStoryModal({ isOpen, onClose, onSuccess }) {
   const [storyType, setStoryType] = useState("image");
@@ -183,19 +184,21 @@ export default function CreateStoryModal({ isOpen, onClose, onSuccess }) {
             {/* Text Story */}
             {storyType === "text" && (
               <>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  <div>
+                  <label className="block text-sm font-semibold text-base-content/70 mb-3">
                     Story Text
                   </label>
-                  <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    rows="4"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent resize-none"
-                    placeholder="What's on your mind?"
-                    maxLength={200}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">{text.length}/200</p>
+                  <div className="w-full border border-base-300 bg-base-200 rounded-lg px-3 py-1">
+                    <VibeInputEditor
+                      value={text}
+                      onChange={setText}
+                      placeholder="What's on your mind?"
+                      height="80px"
+                      borderHidden={true}
+                      fontSize={15}
+                    />
+                  </div>
+                  <p className="text-xs text-base-content/50 mt-1">{text.length}/200</p>
                 </div>
 
                 <div>
@@ -275,17 +278,19 @@ export default function CreateStoryModal({ isOpen, onClose, onSuccess }) {
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  <label className="block text-sm font-semibold text-base-content/70 mb-3">
                     Caption (Optional)
                   </label>
-                  <input
-                    type="text"
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent"
-                    placeholder="Add a caption..."
-                    maxLength={100}
-                  />
+                  <div className="w-full border border-base-300 bg-base-200 rounded-lg px-3 py-1">
+                    <VibeInputEditor
+                      value={caption}
+                      onChange={setCaption}
+                      placeholder="Add a caption..."
+                      height="36px"
+                      borderHidden={true}
+                      fontSize={14}
+                    />
+                  </div>
                 </div>
               </>
             )}

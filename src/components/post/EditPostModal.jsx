@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { useState } from "react";
+import VibeInputEditor from "../common/VibeInputEditor.jsx";
 
 export default function EditPostModal({ isOpen, onClose, post, onSave }) {
   const [caption, setCaption] = useState(post?.caption || "");
@@ -52,14 +53,16 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Caption
             </label>
-            <textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              rows="4"
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none resize-none"
-              placeholder="Write a caption..."
-              autoFocus
-            />
+            <div className="w-full border-2 border-gray-200 rounded-xl px-2 py-1 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-100 transition-all">
+              <VibeInputEditor
+                value={caption}
+                onChange={setCaption}
+                placeholder="Write a caption..."
+                height="80px"
+                borderHidden={true}
+                fontSize={15}
+              />
+            </div>
             <div className="mt-2 text-xs text-gray-500">
               {caption.length} characters
             </div>

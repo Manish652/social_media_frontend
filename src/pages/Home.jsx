@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../api/axios.js";
@@ -38,7 +38,7 @@ export default function Home() {
     fetchPosts();
   }, []);
 
-  const toggleLike = async (post) => {
+  const toggleLike = useCallback(async (post) => {
     const id = post._id || post.id;
     const isLiked =
       Array.isArray(post.likes) && user?._id
@@ -78,9 +78,9 @@ export default function Home() {
       }
       console.error("toggle like failed", err);
     }
-  };
+  }, [user?._id, likedPosts]);
 
-  const toggleSave = async (postId) => {
+  const toggleSave = useCallback(async (postId) => {
     // optimistic UI
     const isSaved = savedPosts.has(postId);
     setSavedPosts((prev) => {
@@ -108,7 +108,11 @@ export default function Home() {
         return newSet;
       });
     }
-  };
+  }, [savedPosts]);
+
+  const handleMediaClick = useCallback((id) => {
+    navigate(`/post/${id}`);
+  }, [navigate]);
 
   return (
     <>
@@ -141,9 +145,9 @@ export default function Home() {
                 post={post}
                 isLiked={isLiked}
                 isSaved={savedPosts.has(id)}
-                onLike={() => toggleLike(post)}
-                onSave={() => toggleSave(id)}
-                onMediaClick={() => navigate(`/post/${id}`)}
+                onLike={toggleLike}
+                onSave={toggleSave}
+                onMediaClick={handleMediaClick}
 
               />
             );

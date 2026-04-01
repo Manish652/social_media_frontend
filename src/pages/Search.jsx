@@ -71,7 +71,7 @@ export default function Search() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search users or captions..."
-              className="flex-1 outline-none text-sm bg-transparent placeholder-base-content/40"
+              className="flex-1 border-none text-lg bg-transparent outline-none placeholder:text-sm placeholder:text-base-content/40"
             />
             <button
               type="submit"

@@ -6,6 +6,7 @@ import runningCat from "../assets/animations/Running Cat.json";
 import { userAuth } from "../context/AuthContext.jsx";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import PostUploadProgress from "./PostUploadProgress.jsx";
+import VibeInputEditor from "../components/common/VibeInputEditor.jsx";
 
 export default function CreateReel() {
   const { user } = userAuth();
@@ -89,13 +90,16 @@ export default function CreateReel() {
               {/* Caption Input */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-base-content/50 uppercase tracking-widest ml-1">Caption</label>
-                <textarea
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  rows="3"
-                  className="textarea textarea-bordered w-full bg-base-200 border-base-300 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none text-base-content placeholder-base-content/30"
-                  placeholder="Tell your vibe..."
-                />
+                <div className="w-full bg-base-200 border border-base-300 rounded-2xl px-4 py-2 transition-all">
+                  <VibeInputEditor
+                    value={caption}
+                    onChange={setCaption}
+                    placeholder="Tell your vibe..."
+                    height="60px"
+                    borderHidden={true}
+                    fontSize={16}
+                  />
+                </div>
               </div>
 
               <PostUploadProgress uploadProgress={uploadProgress} runningCat={runningCat} />

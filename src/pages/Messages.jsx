@@ -1,10 +1,12 @@
-import { ArrowLeft, Image, MessageSquarePlus, Send, Smile, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Image, MessageSquarePlus, Send, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import NewChatModal from ".././components/message/NewChatModal.jsx";
 import api from "../api/axios.js";
 import { userAuth } from "../context/AuthContext.jsx";
 import socket from "../lib/socket.js";
+import VibeInputEditor from "../components/common/VibeInputEditor.jsx";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 export default function Messages() {
   const { user, token } = userAuth();
@@ -21,7 +23,11 @@ export default function Messages() {
   const [sending, setSending] = useState(false);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [viewerImage, setViewerImage] = useState(null);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Socket connection
   useEffect(() => {
@@ -200,7 +206,7 @@ export default function Messages() {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!messageText.trim() || !selectedChat || sending) return;
+    if ((!messageText.trim() && !imageFile) || !selectedChat || sending) return;
 
     // Get receiver ID (the other participant)
     const otherParticipant = selectedChat.participants?.find(
@@ -218,6 +224,7 @@ export default function Messages() {
     const tempMessage = {
       _id: tempId,
       text: messageText,
+      image: imagePreview || null,
       senderId: user._id,
       chatId: selectedChat._id,
       createdAt: new Date().toISOString(),
@@ -227,23 +234,26 @@ export default function Messages() {
     // Optimistically add message to UI
     setMessages((prev) => [...prev, tempMessage]);
     const textToSend = messageText;
+    const fileToSend = imageFile;
     setMessageText("");
+    setImageFile(null);
+    setImagePreview("");
 
     try {
       setSending(true);
-      console.log("📤 [Messages] Sending message:", {
-        chatId: selectedChat._id,
-        receiverId,
-        text: textToSend.substring(0, 30)
-      });
+
+      let imageUrl = null;
+      if (fileToSend) {
+        const result = await uploadToCloudinary(fileToSend, "social_chat_images");
+        imageUrl = result.url;
+      }
 
       const { data } = await api.post("/message/send", {
         chatId: selectedChat._id,
         receiverId: receiverId,
         text: textToSend,
+        image: imageUrl,
       });
-
-      console.log("✅ [Messages] Message sent successfully:", data._id);
 
       // Replace temp message with real one
       setMessages((prev) =>
@@ -257,16 +267,13 @@ export default function Messages() {
             ? { ...chat, lastMessage: data, updatedAt: new Date().toISOString() }
             : chat
         );
-        // Sort by most recent
         return updated.sort((a, b) =>
           new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
         );
       });
     } catch (err) {
       console.error("❌ Failed to send message:", err);
-      // Remove temp message on error
       setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
-      // Restore text
       setMessageText(textToSend);
       alert("Failed to send message. Please try again.");
     } finally {
@@ -418,9 +425,11 @@ export default function Messages() {
                     <p className="font-semibold text-base-content truncate text-base">
                       {getChatName(chat)}
                     </p>
-                    <p className="text-sm text-base-content/70 truncate mt-0.5">
-                      {chat.lastMessage?.text || "Start chatting"}
-                    </p>
+                  <p className="text-sm text-base-content/70 truncate mt-0.5">
+                        {chat.lastMessage?.image && !chat.lastMessage?.text
+                          ? "📷 Photo"
+                          : chat.lastMessage?.text || "Start chatting"}
+                      </p>
                   </div>
                   {chat.lastMessage && (
                     <span className="text-xs text-base-content/50 font-medium">
@@ -488,108 +497,154 @@ export default function Messages() {
           </div>
 
           {/* Messages */}
-          <div
-            className="flex-1 overflow-y-auto p-6 space-y-4"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundColor: "hsl(var(--b1))",
-            }}
-          >
-            {Array.isArray(messages) && messages.length > 0 ? (
-              messages.map((msg, index) => {
-                const isMe = msg.senderId === user._id || msg.senderId?._id === user._id || msg.sender === user._id || msg.sender?._id === user._id;
-                const senderId = msg.senderId?._id || msg.senderId || msg.sender?._id || msg.sender;
-                const sender = participants.find((p) => p._id === senderId);
-                const prevMsg = messages[index - 1];
-                const prevIsMe = prevMsg && (prevMsg.senderId === user._id || prevMsg.senderId?._id === user._id);
-                const showAvatar = !isMe && (!prevMsg || prevIsMe !== isMe);
+          {useMemo(() => (
+            <div
+              className="flex-1 overflow-y-auto p-6 space-y-4"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                backgroundColor: "hsl(var(--b1))",
+              }}
+            >
+              {Array.isArray(messages) && messages.length > 0 ? (
+                messages.map((msg, index) => {
+                  const isMe = msg.senderId === user._id || msg.senderId?._id === user._id || msg.sender === user._id || msg.sender?._id === user._id;
+                  const senderId = msg.senderId?._id || msg.senderId || msg.sender?._id || msg.sender;
+                  const sender = participants.find((p) => p._id === senderId);
+                  const prevMsg = messages[index - 1];
+                  const prevIsMe = prevMsg && (prevMsg.senderId === user._id || prevMsg.senderId?._id === user._id);
+                  const showAvatar = !isMe && (!prevMsg || prevIsMe !== isMe);
 
-                return (
-                  <div
-                    key={msg._id}
-                    className={`flex ${isMe ? "justify-end" : "justify-start"} ${showAvatar ? "mt-4" : "mt-1"
-                      }`}
-                  >
-                    <div className={`flex gap-2 max-w-[75%] md:max-w-[60%] ${isMe ? "flex-row-reverse" : ""}`}>
-                      {!isMe && showAvatar && (
-                        <img
-                          src={sender?.profilePicture || "/user.png"}
-                          alt={sender?.username || "User"}
-                          className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-base-300"
-                        />
-                      )}
-                      {!isMe && !showAvatar && <div className="w-8" />}
-                      <div className="flex flex-col">
-                        <div
-                          className={`px-4 py-2.5 shadow-sm ${isMe
-                            ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl rounded-tr-md"
-                            : "bg-base-100 text-base-content rounded-3xl rounded-tl-md border border-base-300"
-                            } ${msg.temp ? "opacity-60 animate-pulse" : ""}`}
-                          onContextMenu={(e) => {
-                            if (isMe) {
-                              e.preventDefault();
-                              handleDeleteMessage(msg._id);
-                            }
-                          }}
-                        >
-                          <p className="text-[15px] leading-relaxed break-words">{msg.text}</p>
+                  return (
+                    <div
+                      key={msg._id}
+                      className={`flex ${isMe ? "justify-end" : "justify-start"} ${showAvatar ? "mt-4" : "mt-1"
+                        }`}
+                    >
+                      <div className={`flex gap-2 max-w-[75%] md:max-w-[60%] ${isMe ? "flex-row-reverse" : ""}`}>
+                        {!isMe && showAvatar && (
+                          <img
+                            src={sender?.profilePicture || "/user.png"}
+                            alt={sender?.username || "User"}
+                            className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-base-300"
+                          />
+                        )}
+                        {!isMe && !showAvatar && <div className="w-8" />}
+                        <div className="flex flex-col">
+                          <div
+                            className={`px-4 py-2.5 shadow-sm ${isMe
+                              ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl rounded-tr-md"
+                              : "bg-base-100 text-base-content rounded-3xl rounded-tl-md border border-base-300"
+                              } ${msg.temp ? "opacity-60 animate-pulse" : ""}`}
+                            onContextMenu={(e) => {
+                              if (isMe) {
+                                e.preventDefault();
+                                handleDeleteMessage(msg._id);
+                              }
+                            }}
+                          >
+                            {msg.text && <p className="text-[15px] leading-relaxed break-words">{msg.text}</p>}
+                            {msg.image && (
+                              <img
+                                src={msg.image}
+                                alt="Image"
+                                className="max-w-[200px] rounded-xl mt-1 cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => setViewerImage(msg.image)}
+                              />
+                            )}
+                          </div>
+                          <p
+                            className={`text-[11px] text-base-content/50 mt-1 px-1 font-medium ${isMe ? "text-right" : "text-left"
+                              }`}
+                          >
+                            {formatTime(msg.createdAt)}
+                          </p>
                         </div>
-                        <p
-                          className={`text-[11px] text-base-content/50 mt-1 px-1 font-medium ${isMe ? "text-right" : "text-left"
-                            }`}
-                        >
-                          {formatTime(msg.createdAt)}
-                        </p>
                       </div>
                     </div>
+                  );
+                })
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <p className="text-4xl">👋</p>
+                    </div>
+                    <p className="text-base font-semibold text-base-content">No messages yet</p>
+                    <p className="text-sm text-base-content/70 mt-1">Say hi to start the conversation!</p>
                   </div>
-                );
-              })
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <p className="text-4xl">👋</p>
-                  </div>
-                  <p className="text-base font-semibold text-base-content">No messages yet</p>
-                  <p className="text-sm text-base-content/70 mt-1">Say hi to start the conversation!</p>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          ), [messages, user?._id, participants])}
 
           {/* Message Input */}
           <form
             onSubmit={handleSendMessage}
             className="p-4 bg-base-100 border-t border-base-300 flex-shrink-0"
           >
-            <div className="flex items-center gap-2 bg-base-200 rounded-full px-4 py-2 border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            {/* Image Preview Strip */}
+            {imagePreview && (
+              <div className="mb-2 relative inline-block">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-16 w-16 rounded-xl object-cover border border-base-300 shadow"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setImageFile(null); setImagePreview(""); }}
+                  className="absolute -top-2 -right-2 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:scale-110 transition-transform"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+            <div className="flex items-center gap-2 bg-base-200 rounded-full px-4 py-1 border border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }
+                  e.target.value = "";
+                }}
+              />
               <button
                 type="button"
+                onClick={() => fileInputRef.current?.click()}
                 className="p-1.5 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
+                title="Send an image"
               >
                 <Image size={20} className="text-primary" />
               </button>
-              <button
-                type="button"
-                className="p-1.5 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
-              >
-                <Smile size={20} className="text-primary" />
-              </button>
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 bg-transparent px-2 py-1 focus:outline-none text-gray-900 placeholder-gray-400 min-w-0"
-              />
+              <div className="flex-1 min-w-0">
+                <VibeInputEditor
+                  value={messageText}
+                  onChange={setMessageText}
+                  placeholder="Type a message..."
+                  height="20px"
+                  borderHidden={true}
+                  fontSize={15}
+                  borderRadius={0}
+                />
+              </div>
               <button
                 type="submit"
-                disabled={!messageText.trim() || sending}
+                disabled={(!messageText.trim() && !imageFile) || sending}
                 className="p-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 flex-shrink-0"
               >
-                <Send size={18} />
+                {sending ? (
+                  <div className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Send size={18} />
+                )}
               </button>
             </div>
           </form>
@@ -615,6 +670,47 @@ export default function Messages() {
         isOpen={showNewChatModal}
         onClose={() => setShowNewChatModal(false)}
       />
+
+      {/* Image Viewer Lightbox */}
+      {viewerImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setViewerImage(null)}
+          onKeyDown={(e) => e.key === "Escape" && setViewerImage(null)}
+          tabIndex={-1}
+        >
+          <div
+            className="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top bar */}
+            <div className="absolute -top-12 left-0 right-0 flex items-center justify-between px-2">
+              <a
+                href={viewerImage}
+                download
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-white/80 hover:text-white text-sm font-medium bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-all"
+                onClick={(e) => e.stopPropagation()}
+              >
+                ⬇ Download
+              </a>
+              <button
+                onClick={() => setViewerImage(null)}
+                className="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 w-9 h-9 rounded-full flex items-center justify-center transition-all text-xl"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            {/* Image */}
+            <img
+              src={viewerImage}
+              alt="Full view"
+              className="max-w-[90vw] max-h-[85vh] rounded-2xl object-contain shadow-2xl ring-1 ring-white/10"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

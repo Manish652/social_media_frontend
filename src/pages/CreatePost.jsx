@@ -6,7 +6,8 @@ import api from "../api/axios.js";
 import runningCat from "../assets/animations/Running Cat.json";
 import { getMediaType, uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import PostUploadProgress from "./PostUploadProgress.jsx";
-
+import InputEmoji from "react-input-emoji";
+import VibeInputEditor from "../components/common/VibeInputEditor.jsx";
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
@@ -71,23 +72,22 @@ export default function CreatePost() {
           <div className="bg-base-100 rounded-[2.5rem] shadow-2xl border border-base-300 p-6 sm:p-8 transition-colors duration-300">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-black text-base-content flex items-center gap-2">
-                Create Post <div className="w-2 h-2 bg-success rounded-full animate-ping" />
+                Create Post
               </h2>
             </div>
 
             <form onSubmit={onSubmit} className="space-y-6">
               {/* Caption Area */}
-              <div className="relative group">
-                <textarea
+              <div className="w-full bg-base-200 border border-base-300 rounded-3xl px-6 py-5 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all resize-none text-lg text-base-content placeholder:text-base-content/40"
+              >
+                <VibeInputEditor
                   value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  rows="5"
-                  className="w-full bg-base-200 border border-base-300 rounded-3xl px-6 py-5 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all resize-none text-lg text-base-content placeholder:text-base-content/40"
-                  placeholder="What's happening? Spark a conversation..."
+                  onChange={setCaption}
+                  placeholder="Write a comment..."
+                  height="30px"
+                  borderHidden={true} // This removes the box border
                 />
-                <div className="absolute bottom-4 right-6 flex items-center gap-3 text-base-content/30">
-                  <Smile size={20} className="hover:text-primary cursor-pointer transition-colors" />
-                </div>
+
               </div>
 
               {/* Media Preview / Upload Dropzone */}

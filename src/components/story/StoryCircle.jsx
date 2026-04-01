@@ -3,11 +3,11 @@ export default function StoryCircle({ story, onClick }) {
 
   return (
     <div
-      className="flex flex-col items-center cursor-pointer"
+      className="flex flex-col items-center border-none cursor-pointer"
       onClick={() => onClick?.(story)}
     >
       <div
-        className={`avatar ${story.hasStory ? "ring ring-primary ring-offset-base-100 ring-offset-2" : ""}`}
+        className={`avatar ${story.hasStory ? "ring-offset-base-100 ring-offset-2" : ""}`}
       >
         <div className={`w-14 h-14 rounded-full ${story.hasStory ? "ring ring-secondary ring-offset-base-100 ring-offset-2" : ""}`}>
           <img

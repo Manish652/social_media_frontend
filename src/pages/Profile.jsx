@@ -24,8 +24,8 @@ export default function Profile() {
   const [reels, setReels] = useState([]);
   const [activeTab, setActiveTab] = useState("posts");
   const [savedPosts, setSavedPosts] = useState(new Set());
-  const [updating, setUpdating] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [, setUpdating] = useState(false);
+  const [, setDeleting] = useState(false);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [showFollowModal, setShowFollowModal] = useState(false);
@@ -68,7 +68,7 @@ export default function Profile() {
     fetchProfile();
     fetchPosts();
     fetchReels();
-  }, []);
+  }, [login, token]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -81,7 +81,7 @@ export default function Profile() {
         following: Array.isArray(user.following) ? user.following : prev.following,
       };
     });
-  }, [user?._id, user?.followers?.length, user?.following?.length]);
+  }, [user?._id, user?.followers, user?.following]);
   
   useEffect(() => {
     if (user?.savedPosts) {
@@ -121,7 +121,7 @@ export default function Profile() {
     try {
       const { data } = await api.get("/post");
       setPosts(data?.posts || []);
-    } catch (err) {}
+    } catch (err) { console.error(err); }
   };
 
   const handleDeletePost = async (postId) => {
@@ -493,6 +493,7 @@ export default function Profile() {
 }
 
 // Helper component for Empty States to keep code clean
+// eslint-disable-next-line no-unused-vars
 function EmptyState({ icon: Icon, label, sub, link, btn }) {
   return (
     <div className="bg-base-100 rounded-3xl shadow-lg border border-base-300 p-16 text-center">

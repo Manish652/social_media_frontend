@@ -71,7 +71,7 @@ export default function Login() {
                   type="email"
                   name="email"
                   placeholder="name@example.com"
-                  className="input input-bordered w-full h-14 pl-12 bg-base-200/40 border-base-content/10 focus:border-primary text-lg transition-all"
+                  className="input input-bordered w-full h-14 pl-12 bg-base-200/40 border-base-content/10 rounded-2xl focus:border-primary text-lg transition-all"
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -91,7 +91,7 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="••••••••"
-                  className="input input-bordered w-full h-14 pl-12 pr-12 bg-base-200/40 border-base-content/10 focus:border-primary text-lg transition-all"
+                  className="input rounded-2xl input-bordered w-full h-14 pl-12 pr-12 bg-base-200/40 border-base-content/10 focus:border-primary text-lg transition-all"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -109,12 +109,12 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full h-16 text-xl font-bold shadow-2xl shadow-primary/30 hover:translate-y-[-2px] transition-all active:scale-95"
+              className="btn rounded-4xl  btn-primary w-full h-16 text-xl font-bold shadow-2xl shadow-primary/30 hover:translate-y-[-2px] transition-all active:scale-95"
             >
               {loading ? (
                 <span className="loading loading-spinner"></span>
               ) : (
-                <span className="flex items-center gap-3">
+                <span className="flex  items-center gap-3">
                   Get Started <ArrowRight size={24} />
                 </span>
               )}

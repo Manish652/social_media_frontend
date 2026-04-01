@@ -6,7 +6,7 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
-      console.log('🎨 Initial theme from localStorage:', saved || 'light');
+     // console.log('🎨 Initial theme from localStorage:', saved || 'light');
       return saved || 'light';
     }
     return 'light';
@@ -15,8 +15,8 @@ export const ThemeProvider = ({ children }) => {
   // Apply theme on mount and when theme changes
   useEffect(() => {
     const html = document.documentElement;
-    console.log('🎨 Setting theme to:', theme);
-    console.log('🎨 Available themes:', themes);
+    //console.log('🎨 Setting theme to:', theme);
+    //console.log('🎨 Available themes:', themes);
     html.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
@@ -25,7 +25,7 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const saved = localStorage.getItem('theme');
     if (saved) {
-      console.log('🎨 Initializing theme from localStorage:', saved);
+    //  console.log('🎨 Initializing theme from localStorage:', saved);
       setTheme(saved);
       document.documentElement.setAttribute('data-theme', saved);
     }

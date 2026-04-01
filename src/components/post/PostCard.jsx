@@ -1,11 +1,12 @@
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import api from "../../api/axios.js";
 import { userAuth } from "../../context/AuthContext.jsx";
 import VideoPlayer from "./VideoPlayer.jsx";
 import { optimizeCloudinaryVideo } from "../../utils/optimizeMedia.js";
+import VibeInputEditor from "../common/VibeInputEditor.jsx";
 
 function formatTimeAgo(dateStr) {
   try {
@@ -20,7 +21,7 @@ function formatTimeAgo(dateStr) {
   }
 }
 
-export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMediaClick }) {
+const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, onSave, onMediaClick }) {
   const { user, updateFollowing } = userAuth();
   const populatedUser = post?.userId || post?.userID;
   const authorId = populatedUser?._id || populatedUser;
@@ -121,6 +122,18 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
     }
   };
 
+  const handleLikeClick = () => {
+    if (onLike) onLike(post);
+  };
+  
+  const handleSaveClick = () => {
+    if (onSave) onSave(postId);
+  };
+  
+  const handleMediaClickInternal = () => {
+    if (onMediaClick) onMediaClick(postId);
+  };
+
   return (
     <div className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
       {/* Header */}
@@ -180,7 +193,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
             className="w-full max-h-[550px] object-cover cursor-pointer select-none"
             draggable="false"
             onContextMenu={(e) => e.preventDefault()}
-            onClick={onMediaClick}
+            onClick={handleMediaClickInternal}
           />
         ) : mediaVideo ? (
           <VideoPlayer src={mediaVideo} />
@@ -192,7 +205,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5">
             <button
-              onClick={onLike}
+              onClick={handleLikeClick}
               className={`btn btn-ghost btn-circle ${isLiked ? "btn-error" : ""}`}
             >
               <Heart
@@ -216,7 +229,7 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
           </div>
 
           <button
-            onClick={onSave}
+            onClick={handleSaveClick}
             className={`btn btn-ghost btn-circle ${isSaved ? "btn-warning" : ""}`}
           >
             <Bookmark
@@ -330,16 +343,21 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
               </div>
 
               <form onSubmit={addComment} className="p-4 bg-base-200/50 border-t border-base-200">
-                <div className="join w-full">
-                  <input
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Write a comment..."
-                    className="input input-bordered join-item flex-1 bg-base-100"
-                  />
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-base-100 border border-base-300 rounded-2xl px-3 py-1">
+                    <VibeInputEditor
+                      value={newComment}
+                      onChange={setNewComment}
+                      placeholder="Write a comment..."
+                      height="36px"
+                      borderHidden={true}
+                      fontSize={14}
+                      borderRadius={16}
+                    />
+                  </div>
                   <button
                     type="submit"
-                    className="btn btn-primary join-item"
+                    className="btn btn-primary btn-sm rounded-xl"
                   >
                     Post
                   </button>
@@ -351,4 +369,6 @@ export default function PostCard({ post, isLiked, isSaved, onLike, onSave, onMed
       )}
     </div>
   );
-}
+});
+
+export default PostCard;
