@@ -1,17 +1,17 @@
 import axios from "axios";
 import getToken, { setToken } from "../utils/getToken.js";
 
-// const api = axios.create({
-//   baseURL: import.meta.env.VITE_BASE_URL || "https://social-media-backend-m0n7.onrender.com/api",
-//   withCredentials: true,
-//   timeout: 600000, 
-// });
-
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_BASE_URL || "https://social-media-backend-m0n7.onrender.com/api",
   withCredentials: true,
-  timeout: 600000,
+  timeout: 600000, 
 });
+
+// const api = axios.create({
+//   baseURL: "http://localhost:5000/api",
+//   withCredentials: true,
+//   timeout: 600000,
+// });
 
 
 
