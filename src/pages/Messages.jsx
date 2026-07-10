@@ -289,8 +289,7 @@ export default function Messages() {
           </div>
 
           {/* Messages */}
-          {useMemo(() => (
-            <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`, backgroundColor: "hsl(var(--b1))" }}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`, backgroundColor: "hsl(var(--b1))" }}>
               {messages.length > 0 ? messages.map((msg) => {
                 const isMe = msg.senderId === user._id || msg.senderId?._id === user._id;
                 const senderId = msg.senderId?._id || msg.senderId;
@@ -326,7 +325,6 @@ export default function Messages() {
               )}
               <div ref={messagesEndRef} />
             </div>
-          ), [messages, user?._id, participants])}
 
           {/* Input */}
           <form onSubmit={handleSendMessage} className="p-3 bg-base-100 border-t border-base-300 flex-shrink-0">

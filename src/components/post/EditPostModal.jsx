@@ -1,13 +1,18 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import VibeInputEditor from "../common/VibeInputEditor.jsx";
+import TagsInput from "../common/TagsInput.jsx";
 
 export default function EditPostModal({ isOpen, onClose, post, onSave }) {
   const [caption, setCaption] = useState(post?.caption || "");
+  const [tags, setTags] = useState(post?.tags || []);
   const [saving, setSaving] = useState(false);
 
   // Sync caption when the post being edited changes
-  useEffect(() => { setCaption(post?.caption || ""); }, [post?._id]);
+  useEffect(() => { 
+    setCaption(post?.caption || ""); 
+    setTags(post?.tags || []);
+  }, [post?._id, post?.caption, post?.tags]);
 
   if (!isOpen) return null;
 
@@ -15,7 +20,7 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave(caption);
+      await onSave({ caption, tags });
       onClose();
     } catch (err) {
       // Error handled by parent
@@ -69,6 +74,14 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
             <div className="mt-2 text-xs text-gray-500">
               {caption.length} characters
             </div>
+          </div>
+
+          {/* Tags Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Tags
+            </label>
+            <TagsInput value={tags} onChange={setTags} placeholder="Add tags (e.g., WebDev, React)" />
           </div>
 
           {/* Actions */}

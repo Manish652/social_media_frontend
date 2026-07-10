@@ -3,26 +3,25 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
 import { userAuth } from "../../context/AuthContext.jsx";
 
-const trendingTags = [
-  { tag: "WebDevelopment", posts: "2.5k" },
-  { tag: "AI", posts: "1.8k" },
-  { tag: "StartupLife", posts: "1.2k" },
-  { tag: "ReactJS", posts: "980" },
-  { tag: "Design", posts: "750" },
-];
 
 export default function RightSidebar() {
   const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [trendingTags, setTrendingTags] = useState([]);
   const [followingStates, setFollowingStates] = useState({});
   const [loading, setLoading] = useState(true);
   const { updateFollowing } = userAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get("/user/suggested")
-      .then(res => setSuggestedUsers((res.data || []).slice(0, 4)))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      api.get("/user/suggested").catch(() => ({ data: [] })),
+      api.get("/search/trending").catch(() => ({ data: { tags: [] } }))
+    ])
+    .then(([usersRes, tagsRes]) => {
+      setSuggestedUsers((usersRes.data || []).slice(0, 4));
+      setTrendingTags((tagsRes.data?.tags || []));
+    })
+    .finally(() => setLoading(false));
   }, []);
 
   const handleFollow = async (userId) => {
@@ -82,14 +81,14 @@ export default function RightSidebar() {
           )}
         </div>
 
-        {/* Trending Topics */}
         <div className="mb-6">
           <h3 className="font-semibold text-base-content text-sm mb-3">Trending</h3>
           <div className="space-y-2">
+            {trendingTags.length === 0 && <p className="text-xs text-base-content/50 py-2">No trending tags yet</p>}
             {trendingTags.map(item => (
               <Link key={item.tag} to={`/search?q=${item.tag}`} className="block p-2.5 rounded-xl hover:bg-base-200 transition-colors">
                 <p className="font-medium text-sm text-base-content">#{item.tag}</p>
-                <p className="text-xs text-base-content/60 mt-0.5">{item.posts} posts</p>
+                <p className="text-xs text-base-content/60 mt-0.5">{item.count} posts</p>
               </Link>
             ))}
           </div>

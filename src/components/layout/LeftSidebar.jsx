@@ -32,8 +32,8 @@ export default function LeftSidebar() {
               className="w-12 h-12 rounded-full object-cover ring-2 ring-base-100 group-hover:ring-primary/20 transition-all"
             />
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-base-content truncate">
-                {user?.fullName || "User"}
+              <p className="font-semibold text-base-content truncate text-lg">
+                {user?.username || "User"}
               </p>
               <p className="text-sm text-base-content/70 truncate">@{user?.username}</p>
             </div>

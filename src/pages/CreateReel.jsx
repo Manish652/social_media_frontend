@@ -7,6 +7,7 @@ import { userAuth } from "../context/AuthContext.jsx";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import PostUploadProgress from "./PostUploadProgress.jsx";
 import VibeInputEditor from "../components/common/VibeInputEditor.jsx";
+import TagsInput from "../components/common/TagsInput.jsx";
 
 export default function CreateReel() {
   const { user } = userAuth();
@@ -14,6 +15,7 @@ export default function CreateReel() {
   const [video, setVideo] = useState(null);
   const [videoPreview, setVideoPreview] = useState("");
   const [caption, setCaption] = useState("");
+  const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [err, setErr] = useState("");
@@ -35,7 +37,7 @@ export default function CreateReel() {
       setLoading(true);
       setUploadProgress("Uploading reel...");
       const result = await uploadToCloudinary(video, "reels_uploads");
-      await api.post("/reel/create", { videoUrl: result.url, caption });
+      await api.post("/reel/create", { videoUrl: result.url, caption, tags });
       navigate("/reels");
     } catch (e) {
       setErr(e?.response?.data?.message || "Failed to create reel");
@@ -100,6 +102,12 @@ export default function CreateReel() {
                     fontSize={16}
                   />
                 </div>
+              </div>
+
+              {/* Tags Input */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-base-content/50 uppercase tracking-widest ml-1">Tags</label>
+                <TagsInput value={tags} onChange={setTags} placeholder="Add tags (e.g., WebDev, React)" />
               </div>
 
               <PostUploadProgress uploadProgress={uploadProgress} runningCat={runningCat} />

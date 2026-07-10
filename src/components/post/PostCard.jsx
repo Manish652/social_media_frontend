@@ -21,6 +21,22 @@ function formatTimeAgo(dateStr) {
   }
 }
 
+function renderTextWithLinks(text) {
+  if (!text) return null;
+  // Match URLs starting with http:// or https://
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.split(urlRegex).map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 // Recursive reply component
 function CommentItem({ comment, postId, depth = 0, onCommentDeleted, currentUserId }) {
   const [replyText, setReplyText] = useState("");
@@ -359,6 +375,15 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
         </div>
       </div>
 
+      {/* Caption at the top */}
+      {post?.caption && (
+        <div className="px-5 pb-3">
+          <p className="text-sm text-base-content leading-relaxed whitespace-pre-wrap">
+            {renderTextWithLinks(post.caption)}
+          </p>
+        </div>
+      )}
+
       {/* Media */}
       <div className="bg-base-200/30">
         {mediaImage ? (
@@ -435,15 +460,6 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
             {likesCount.toLocaleString()} <span className="font-normal text-base-content/70">likes</span>
           </p>
         </div>
-
-        {post?.caption && (
-          <p className="text-sm text-base-content leading-relaxed">
-            <Link to={authorId ? `/profile/${authorId}` : "#"} className="font-bold text-primary hover:underline mr-2">
-              {username}
-            </Link>
-            {post.caption}
-          </p>
-        )}
       </div>
 
       {/* Comments Section - Nested / YouTube-style */}

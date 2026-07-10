@@ -8,9 +8,11 @@ import { getMediaType, uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import PostUploadProgress from "./PostUploadProgress.jsx";
 import InputEmoji from "react-input-emoji";
 import VibeInputEditor from "../components/common/VibeInputEditor.jsx";
+import TagsInput from "../components/common/TagsInput.jsx";
 export default function CreatePost() {
   const navigate = useNavigate();
   const [caption, setCaption] = useState("");
+  const [tags, setTags] = useState([]);
   const [media, setMedia] = useState(null);
   const [preview, setPreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -50,6 +52,7 @@ export default function CreatePost() {
         caption,
         mediaUrl,
         mediaType,
+        tags
       });
 
       toast.success("Vibe shared successfully!");
@@ -88,6 +91,12 @@ export default function CreatePost() {
                   borderHidden={true} // This removes the box border
                 />
 
+              </div>
+
+              {/* Tags Area */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-base-content/50 uppercase tracking-widest ml-1">Tags</label>
+                <TagsInput value={tags} onChange={setTags} placeholder="Add tags (e.g., WebDev, React)" />
               </div>
 
               {/* Media Preview / Upload Dropzone */}

@@ -132,11 +132,11 @@ export default function Home() {
     }
   }, []);
 
-  const handleSavePostEdit = async (caption) => {
+  const handleSavePostEdit = async ({ caption, tags }) => {
     try {
       setUpdating(true);
-      await api.put(`/post/update/${editingPost._id}`, { caption });
-      setPosts(prev => prev.map(p => (p._id || p.id) === editingPost._id ? { ...p, caption } : p));
+      await api.put(`/post/update/${editingPost._id}`, { caption, tags });
+      setPosts(prev => prev.map(p => (p._id || p.id) === editingPost._id ? { ...p, caption, tags } : p));
       toast.success("Post updated!");
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to update post");

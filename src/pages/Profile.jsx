@@ -147,10 +147,10 @@ export default function Profile() {
     setShowEditModal(true);
   };
 
-  const handleSavePostEdit = async (caption) => {
+  const handleSavePostEdit = async ({ caption, tags }) => {
     try {
       setUpdating(true);
-      await api.put(`/post/update/${editingPost._id}`, { caption });
+      await api.put(`/post/update/${editingPost._id}`, { caption, tags });
       await refreshPosts();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to update post");
