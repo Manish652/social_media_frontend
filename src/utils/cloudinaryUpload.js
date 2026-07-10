@@ -25,8 +25,14 @@ export async function uploadToCloudinary(file, folder = "social_media_uploads") 
     formData.append("upload_preset", uploadPreset);
     formData.append("folder", folder);
 
+    // Detect resource type (image vs video)
+    const isVideo = file.type.startsWith("video/");
+    const resourceType = isVideo ? "video" : "image";
+
+    formData.append("resource_type", resourceType);
+
     // Upload directly to Cloudinary (bypasses your backend)
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
 
     console.log("[Client Upload] Uploading to:", cloudinaryUrl);
     console.log("[Client Upload] File:", file.name, file.type, file.size);

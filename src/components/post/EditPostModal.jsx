@@ -1,10 +1,13 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import VibeInputEditor from "../common/VibeInputEditor.jsx";
 
 export default function EditPostModal({ isOpen, onClose, post, onSave }) {
   const [caption, setCaption] = useState(post?.caption || "");
   const [saving, setSaving] = useState(false);
+
+  // Sync caption when the post being edited changes
+  useEffect(() => { setCaption(post?.caption || ""); }, [post?._id]);
 
   if (!isOpen) return null;
 

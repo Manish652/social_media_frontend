@@ -11,7 +11,7 @@ import ReelCard from "../components/reel/ReelCard.jsx";
 import { userAuth } from "../context/AuthContext";
 
 export default function Profile() {
-  const { user, login, logout, token } = userAuth();
+  const { user, logout } = userAuth();
   const [profile, setProfile] = useState({
     username: "",
     email: "",
@@ -34,41 +34,30 @@ export default function Profile() {
   const [editingPost, setEditingPost] = useState(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    // Run only once on mount – no login/token in deps to avoid glitch loop
+    let cancelled = false;
+    const load = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get("/user/profile");
-        setProfile(data);
-        login(data, token);
+        const [profileRes, postsRes, reelsRes] = await Promise.all([
+          api.get("/user/profile"),
+          api.get("/post"),
+          api.get("/reel/all"),
+        ]);
+        if (cancelled) return;
+        setProfile(profileRes.data);
+        setPosts(postsRes.data?.posts || []);
+        setReels(reelsRes.data?.reels || []);
       } catch (err) {
-        console.log("Profile fetch failed:", err.message);
+        console.log("Profile load failed:", err.message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-
-    const fetchPosts = async () => {
-      try {
-        const { data } = await api.get("/post");
-        setPosts(data?.posts || []);
-      } catch (err) {
-        console.log("Posts fetch failed:", err.message);
-      }
-    };
-
-    const fetchReels = async () => {
-      try {
-        const { data } = await api.get("/reel/all");
-        setReels(data?.reels || []);
-      } catch (err) {
-        console.log("Reels fetch failed:", err.message);
-      }
-    };
-
-    fetchProfile();
-    fetchPosts();
-    fetchReels();
-  }, [login, token]);
+    load();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -199,7 +188,6 @@ export default function Profile() {
       };
 
       setProfile(updatedProfile);
-      login(updatedProfile, token);
       toast.success("Profile updated!");
       setProfileImageFile(null);
       setPreview("");

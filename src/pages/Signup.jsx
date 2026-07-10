@@ -20,7 +20,9 @@ export default function Signup() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState("");
   const [uploadProgress, setUploadProgress] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
 
   const passwordStrength = useMemo(() => {
@@ -47,18 +49,25 @@ export default function Signup() {
     }
   };
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
+  const handleSendOtp = async (e, isResend = false) => {
+    if (e?.preventDefault) e.preventDefault();
     if (loading) return;
     setLoading(true);
+    setLoadingMsg("Sending OTP to your email… this may take up to 15 seconds");
     try {
       await api.post("/user/send-otp", { email: formData.email });
-      toast.success("OTP sent to your email!");
+      toast.success("OTP sent! Check your inbox (and spam folder) 📧");
       setStep(2);
+      // Start 60s cooldown for resend
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown(prev => { if (prev <= 1) { clearInterval(interval); return 0; } return prev - 1; });
+      }, 1000);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to send OTP");
+      toast.error(err?.response?.data?.message || "Failed to send OTP. Check your email address and try again.");
     } finally {
       setLoading(false);
+      setLoadingMsg("");
     }
   };
 
@@ -161,26 +170,34 @@ export default function Signup() {
                 </InputField>
               </div>
             ) : (
-              <div className="space-y-6 animate-fadeInRight">
-                <div className="bg-primary/5 p-6 rounded-3xl border border-primary/10 text-center">
-                  <ShieldCheck size={48} className="mx-auto text-primary mb-3" />
+              <div className="space-y-5 animate-fadeInRight">
+                <div className="bg-primary/5 p-5 rounded-3xl border border-primary/10 text-center">
+                  <ShieldCheck size={44} className="mx-auto text-primary mb-3" />
                   <h4 className="text-xl font-bold">Verify your Email</h4>
-                  <p className="text-sm text-base-content/60 mt-2">We sent a 6-digit code to <br/><span className="text-primary font-bold">{formData.email}</span></p>
+                  <p className="text-sm text-base-content/60 mt-2">We sent a 6-digit code to<br/><span className="text-primary font-bold">{formData.email}</span></p>
+                  <p className="text-xs text-base-content/40 mt-1">Not in inbox? Check your <span className="font-semibold">spam/junk</span> folder</p>
                 </div>
                 
                 <InputField icon={<Lock size={20}/>} label="Enter OTP">
                   <input type="text" placeholder="000000" className="input rounded-4xl input-bordered w-full pl-12 text-center tracking-[1em] text-xl font-bold bg-base-200/40 border-base-content/10 focus:border-primary transition-all" value={otp} onChange={(e) => setOtp(e.target.value)} required maxLength={6} />
                 </InputField>
 
-                <button type="button" onClick={() => setStep(1)} className="btn btn-ghost w-full rounded-4xl gap-2 text-base-content/50 hover:bg-transparent">
-                  <ArrowLeft size={18} /> Edit Details
-                </button>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setStep(1)} className="btn btn-ghost flex-1 rounded-4xl gap-2 text-base-content/50 hover:bg-base-200">
+                    <ArrowLeft size={16} /> Edit
+                  </button>
+                  <button type="button" disabled={resendCooldown > 0 || loading} onClick={(e) => handleSendOtp(e, true)}
+                    className="btn btn-outline flex-1 rounded-4xl gap-2 text-primary border-primary/30 hover:bg-primary/5 disabled:opacity-40">
+                    {resendCooldown > 0 ? `Resend (${resendCooldown}s)` : "Resend OTP"}
+                  </button>
+                </div>
               </div>
             )}
 
-            {uploadProgress && (
-              <div className="flex items-center justify-center gap-2 text-primary font-bold animate-pulse text-sm">
-                <span className="loading loading-dots loading-xs"></span> {uploadProgress}
+            {(uploadProgress || loadingMsg) && (
+              <div className="flex items-center justify-center gap-2 text-primary font-bold animate-pulse text-sm text-center">
+                <span className="loading loading-dots loading-xs"></span>
+                <span>{uploadProgress || loadingMsg}</span>
               </div>
             )}
 

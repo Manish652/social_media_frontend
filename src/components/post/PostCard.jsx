@@ -1,5 +1,5 @@
-import { Bookmark, Heart, MessageCircle, MoreHorizontal, Trash2 } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import { Bookmark, ChevronDown, ChevronUp, CornerDownRight, Heart, MessageCircle, MoreHorizontal, Pencil, Send, Trash2 } from "lucide-react";
+import React, { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import api from "../../api/axios.js";
@@ -21,7 +21,158 @@ function formatTimeAgo(dateStr) {
   }
 }
 
-const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, onSave, onMediaClick }) {
+// Recursive reply component
+function CommentItem({ comment, postId, depth = 0, onCommentDeleted, currentUserId }) {
+  const [replyText, setReplyText] = useState("");
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  const [replies, setReplies] = useState(comment.replies || []);
+  const [liked, setLiked] = useState((comment.likes || []).map(String).includes(String(currentUserId)));
+  const [likeCount, setLikeCount] = useState((comment.likes || []).length);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleReply = async (e) => {
+    e.preventDefault();
+    if (!replyText.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      const { data } = await api.post(`/comment/reply/${comment._id}`, { text: replyText.trim() });
+      if (data?.reply) {
+        setReplies(prev => [...prev, data.reply]);
+        setShowReplies(true);
+      }
+      setReplyText("");
+      setShowReplyInput(false);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to post reply");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Delete this comment?")) return;
+    try {
+      await api.delete(`/comment/${postId}/comment/${comment._id}`);
+      onCommentDeleted(comment._id);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to delete");
+    }
+  };
+
+  const toggleLike = async () => {
+    setLiked(prev => !prev);
+    setLikeCount(prev => liked ? prev - 1 : prev + 1);
+    try {
+      await api.post(`/comment/like/${comment._id}`);
+    } catch {
+      setLiked(prev => !prev);
+      setLikeCount(prev => liked ? prev + 1 : prev - 1);
+    }
+  };
+
+  const handleReplyDeleted = useCallback((deletedId) => {
+    setReplies(prev => prev.filter(r => r._id !== deletedId));
+  }, []);
+
+  const isOwner = String(comment.user?._id) === String(currentUserId);
+  const paddingLeft = depth > 0 ? `${Math.min(depth * 16, 48)}px` : "0";
+
+  return (
+    <div style={{ paddingLeft }} className={depth > 0 ? "border-l-2 border-base-300 mt-2" : ""}>
+      <div className="flex items-start gap-2.5 p-3 hover:bg-base-200/40 rounded-xl transition-colors group">
+        <Link to={`/u/${comment.user?._id}`} className="flex-shrink-0">
+          <img
+            src={comment.user?.profilePicture || "/user.png"}
+            alt={comment.user?.username || "User"}
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-base-200"
+          />
+        </Link>
+
+        <div className="flex-1 min-w-0">
+          <div className="bg-base-200 rounded-2xl px-3.5 py-2.5">
+            <Link to={`/u/${comment.user?._id}`} className="text-xs font-bold text-base-content hover:text-primary transition-colors">
+              {comment.user?.username || "User"}
+            </Link>
+            <p className="text-sm text-base-content/90 leading-relaxed mt-0.5">{comment.text}</p>
+          </div>
+
+          {/* Comment actions */}
+          <div className="flex items-center gap-3 mt-1 px-1">
+            <span className="text-[10px] text-base-content/50">{formatTimeAgo(comment.createdAt)}</span>
+            <button onClick={toggleLike} className={`text-xs font-semibold flex items-center gap-0.5 transition-colors ${liked ? "text-red-500" : "text-base-content/50 hover:text-base-content"}`}>
+              <Heart size={12} fill={liked ? "currentColor" : "none"} />
+              {likeCount > 0 && <span>{likeCount}</span>}
+            </button>
+            <button
+              onClick={() => setShowReplyInput(prev => !prev)}
+              className="text-xs font-semibold text-base-content/50 hover:text-primary transition-colors"
+            >
+              Reply
+            </button>
+            {isOwner && (
+              <button onClick={handleDelete} className="text-xs text-error/70 hover:text-error opacity-0 group-hover:opacity-100 transition-all">
+                <Trash2 size={12} />
+              </button>
+            )}
+          </div>
+
+          {/* Reply input */}
+          {showReplyInput && (
+            <form onSubmit={handleReply} className="mt-2 flex gap-2 items-center">
+              <div className="flex-1 bg-base-100 border border-base-300 rounded-full px-3 py-1 text-sm">
+                <VibeInputEditor
+                  value={replyText}
+                  onChange={setReplyText}
+                  placeholder={`Reply to @${comment.user?.username}…`}
+                  height="24px"
+                  borderHidden={true}
+                  fontSize={13}
+                />
+              </div>
+              <button type="submit" disabled={!replyText.trim() || submitting} className="p-2 bg-primary text-white rounded-full disabled:opacity-40 hover:bg-primary/90 transition-colors">
+                <Send size={14} />
+              </button>
+            </form>
+          )}
+
+          {/* Show replies toggle */}
+          {replies.length > 0 && (
+            <button
+              onClick={() => setShowReplies(prev => !prev)}
+              className="mt-1.5 flex items-center gap-1 text-xs text-primary font-semibold hover:underline px-1"
+            >
+              <CornerDownRight size={12} />
+              {showReplies ? (
+                <><ChevronUp size={12} /> Hide {replies.length} {replies.length === 1 ? "reply" : "replies"}</>
+              ) : (
+                <><ChevronDown size={12} /> View {replies.length} {replies.length === 1 ? "reply" : "replies"}</>
+              )}
+            </button>
+          )}
+
+          {/* Nested replies */}
+          {showReplies && replies.length > 0 && (
+            <div className="mt-1.5 space-y-1">
+              {replies.map(reply => (
+                <CommentItem
+                  key={reply._id}
+                  comment={reply}
+                  postId={postId}
+                  depth={depth + 1}
+                  onCommentDeleted={handleReplyDeleted}
+                  currentUserId={currentUserId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, onSave, onMediaClick, showOwnerActions = false, onEdit, onDelete }) {
   const { user, updateFollowing } = userAuth();
   const populatedUser = post?.userId || post?.userID;
   const authorId = populatedUser?._id || populatedUser;
@@ -30,7 +181,6 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
   const timeAgo = post?.createdAt ? formatTimeAgo(post.createdAt) : post?.timeAgo || "";
   const likesCount = Array.isArray(post?.likes) ? post.likes.length : post?.likes || 0;
 
-  // Handle both old (image/video) and new (mediaUrl/mediaType) field structures
   const mediaImage = post?.mediaType === "image" ? post?.mediaUrl : post?.image;
   const mediaVideo = post?.mediaType === "video" ? post?.mediaUrl : post?.video;
 
@@ -91,24 +241,16 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
     }
   };
 
-  const deleteComment = async (commentId) => {
-    if (!confirm("Delete this comment?")) return;
-    try {
-      await api.delete(`/comment/${postId}/comment/${commentId}`);
-      setComments((prev) => prev.filter((c) => c._id !== commentId));
-      setCommentCount((c) => Math.max(0, c - 1));
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to delete comment");
-    }
-  };
+  const handleCommentDeleted = useCallback((commentId) => {
+    setComments((prev) => prev.filter((c) => c._id !== commentId));
+    setCommentCount((c) => Math.max(0, c - 1));
+  }, []);
 
-  //  Updated Follow / Unfollow with Socket emit
   const handleFollow = async () => {
     updateFollowing(authorId, "follow");
     try {
       await api.post(`/follow/${authorId}/follow`);
     } catch {
-
       updateFollowing(authorId, "unfollow");
     }
   };
@@ -125,14 +267,17 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
   const handleLikeClick = () => {
     if (onLike) onLike(post);
   };
-  
+
   const handleSaveClick = () => {
     if (onSave) onSave(postId);
   };
-  
+
   const handleMediaClickInternal = () => {
     if (onMediaClick) onMediaClick(postId);
   };
+
+  // Can show owner actions if it's my post - either via prop or autodetect
+  const canEdit = showOwnerActions || isMe;
 
   return (
     <div className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300">
@@ -164,7 +309,7 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
             {!isMe && authorId && !isFollowing && (
               <button
                 onClick={handleFollow}
-                className="btn btn-primary btn-sm"
+                className="btn btn-primary btn-xs rounded-full px-3"
               >
                 Follow
               </button>
@@ -172,14 +317,44 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
             {!isMe && authorId && isFollowing && (
               <button
                 onClick={handleUnfollow}
-                className="btn btn-outline btn-sm"
+                className="btn btn-outline btn-xs rounded-full px-3"
               >
                 Following
               </button>
             )}
-            <button className="btn btn-ghost btn-circle btn-sm">
-              <MoreHorizontal size={18} />
-            </button>
+            {/* Owner actions menu */}
+            {canEdit && (
+              <div className="flex items-center gap-1">
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(post)}
+                    title="Edit post"
+                    className="btn btn-ghost btn-circle btn-sm text-info hover:bg-info/10"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    onClick={() => onDelete(postId)}
+                    title="Delete post"
+                    className="btn btn-ghost btn-circle btn-sm text-error hover:bg-error/10"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
+                {!onEdit && !onDelete && (
+                  <button className="btn btn-ghost btn-circle btn-sm">
+                    <MoreHorizontal size={18} />
+                  </button>
+                )}
+              </div>
+            )}
+            {!canEdit && (
+              <button className="btn btn-ghost btn-circle btn-sm">
+                <MoreHorizontal size={18} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -255,11 +430,6 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
                 <span className="text-xs">+</span>
               </div>
             </div>
-            <div className="avatar placeholder">
-              <div className="bg-yellow-400 text-white rounded-full w-6">
-                <span className="text-xs">+</span>
-              </div>
-            </div>
           </div>
           <p className="text-sm font-bold text-base-content">
             {likesCount.toLocaleString()} <span className="font-normal text-base-content/70">likes</span>
@@ -276,23 +446,49 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
         )}
       </div>
 
-      {/* Comments Section */}
+      {/* Comments Section - Nested / YouTube-style */}
       {open && (
         <div className="mx-4 mb-4">
           <div className="card bg-base-100 shadow-lg border border-base-200">
             <div className="card-body p-0">
-              <div className="bg-primary text-primary-content px-5 py-3 flex items-center justify-between">
-                <p className="text-sm font-bold">Comments</p>
-                <div className="badge badge-primary badge-sm">
-                  {commentCount}
-                </div>
+              <div className="bg-gradient-to-r from-primary to-secondary text-primary-content px-5 py-3 flex items-center justify-between rounded-t-2xl">
+                <p className="text-sm font-bold">Comments ({commentCount})</p>
+                <button onClick={toggleComments} className="text-white/70 hover:text-white text-xs">Close</button>
               </div>
 
-              <div className="max-h-72 overflow-y-auto">
+              {/* Add new comment */}
+              <form onSubmit={addComment} className="p-4 border-b border-base-200">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={user?.profilePicture || "/user.png"}
+                    alt="me"
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 bg-base-200 border border-base-300 rounded-full px-3 py-1">
+                    <VibeInputEditor
+                      value={newComment}
+                      onChange={setNewComment}
+                      placeholder="Write a comment…"
+                      height="28px"
+                      borderHidden={true}
+                      fontSize={14}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!newComment.trim()}
+                    className="p-2 bg-primary text-white rounded-full disabled:opacity-40 hover:bg-primary/90 transition-colors"
+                  >
+                    <Send size={15} />
+                  </button>
+                </div>
+              </form>
+
+              {/* Comments list */}
+              <div className="max-h-96 overflow-y-auto p-2">
                 {loading ? (
                   <div className="p-6 text-center">
                     <span className="loading loading-spinner loading-md text-primary"></span>
-                    <p className="text-sm text-base-content/60 mt-2">Loading comments...</p>
                   </div>
                 ) : comments.length === 0 ? (
                   <div className="p-8 text-center">
@@ -302,67 +498,20 @@ const PostCard = React.memo(function PostCard({ post, isLiked, isSaved, onLike, 
                     <p className="text-sm text-base-content/60 font-medium">Be the first to comment!</p>
                   </div>
                 ) : (
-                  comments.map((c, idx) => (
-                    <div
-                      key={c._id}
-                      className={`p-5 flex items-start gap-3 hover:bg-base-200/50 transition-colors ${idx !== comments.length - 1 ? "border-b border-base-200" : ""}`}
-                    >
-                      <div className="avatar placeholder">
-                        <div className="bg-neutral text-neutral-content rounded-full w-8">
-                          <img
-                            src={c.user?.profilePicture || "/user.png"}
-                            alt={c.user?.username || "User"}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="bg-base-200 rounded-2xl px-4 py-2.5">
-                          <p className="text-sm font-bold text-base-content mb-1">
-                            {c.user?.username || "User"}
-                          </p>
-                          <p className="text-sm text-base-content leading-relaxed">{c.text}</p>
-                        </div>
-                        <p className="text-xs text-base-content/50 mt-1.5 ml-4 font-medium">
-                          {c.createdAt ? formatTimeAgo(c.createdAt) : ""}
-                        </p>
-                      </div>
-
-                      {user?._id && c.user && String(c.user._id) === String(user._id) && (
-                        <button
-                          className="btn btn-ghost btn-sm text-error hover:bg-error/10"
-                          onClick={() => deleteComment(c._id)}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                  ))
+                  <div className="space-y-1">
+                    {comments.map((c) => (
+                      <CommentItem
+                        key={c._id}
+                        comment={c}
+                        postId={postId}
+                        depth={0}
+                        onCommentDeleted={handleCommentDeleted}
+                        currentUserId={user?._id}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
-
-              <form onSubmit={addComment} className="p-4 bg-base-200/50 border-t border-base-200">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-base-100 border border-base-300 rounded-2xl px-3 py-1">
-                    <VibeInputEditor
-                      value={newComment}
-                      onChange={setNewComment}
-                      placeholder="Write a comment..."
-                      height="36px"
-                      borderHidden={true}
-                      fontSize={14}
-                      borderRadius={16}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-sm rounded-xl"
-                  >
-                    Post
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         </div>
