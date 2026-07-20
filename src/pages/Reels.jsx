@@ -236,12 +236,8 @@ export default function Reels() {
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="h-screen overflow-y-scroll snap-y snap-mandatory bg-black relative lg:ml-64 xl:mr-80"
-      style={{
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-        paddingBottom: 'env(safe-area-inset-bottom)'
-      }}
+      className="h-screen overflow-y-scroll snap-y snap-mandatory bg-base-100 relative lg:ml-64 xl:mr-80"
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <style>{`
         div::-webkit-scrollbar { display: none; }
@@ -433,102 +429,95 @@ export default function Reels() {
       })}
 
       {/* Comments Modal */}
-      {
-        showComments && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center">
-            <div className="bg-white w-full md:w-[500px] md:rounded-2xl rounded-t-3xl shadow-2xl max-h-[85vh] md:max-h-[700px] flex flex-col animate-slide-up">
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  Comments
-                </h3>
-                <button
-                  onClick={closeComments}
-                  className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
+      {showComments && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center">
+          <div className="bg-base-100 w-full md:w-[500px] md:rounded-2xl rounded-t-3xl shadow-2xl max-h-[85vh] md:max-h-[700px] flex flex-col animate-slide-up border border-base-300">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-base-300">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Comments
+              </h3>
+              <button
+                onClick={closeComments}
+                className="w-10 h-10 rounded-full bg-base-200 hover:bg-base-300 flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5 text-base-content" />
+              </button>
+            </div>
 
-              {/* Comments List */}
-              <div className="flex-1 overflow-y-auto px-6 py-4">
-                {loadingComments ? (
-                  <div className="flex justify-center py-12">
-                    <div className="relative">
-                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200"></div>
-                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-transparent border-t-purple-600 absolute top-0 left-0"></div>
-                    </div>
-                  </div>
-                ) : comments.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="text-6xl mb-4">💬</div>
-                    <p className="text-gray-500 text-lg font-medium">No comments yet</p>
-                    <p className="text-gray-400 text-sm mt-2">Be the first to comment!</p>
-                  </div>
-                ) : (
-                  comments.map((comment) => (
-                    <div key={comment._id} className="flex gap-3 mb-5 group">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 p-0.5 flex-shrink-0">
-                        <img
-                          src={comment.user.profilePicture}
-                          alt={comment.user.username}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 bg-gray-50 rounded-2xl px-4 py-3 group-hover:bg-gray-100 transition-colors">
-                        <p className="font-semibold text-gray-900 text-sm mb-1">
-                          {comment.user.username}
-                        </p>
-                        <p className="text-gray-700 text-sm leading-relaxed">{comment.text}</p>
-                        <p className="text-gray-400 text-xs mt-2">
-                          {new Date(comment.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Comment Input */}
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                <div className="flex gap-3 items-center">
-                  <input
-                    type="text"
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        submitComment(reels[currentIndex]._id);
-                      }
-                    }}
-                    placeholder="Add a comment..."
-                    className="flex-1 border-2 border-gray-200 rounded-full px-5 py-3 text-sm focus:outline-none focus:border-purple-500 transition-colors bg-white"
-                  />
-                  <button
-                    onClick={() => submitComment(reels[currentIndex]._id)}
-                    disabled={!commentText.trim() || submittingComment}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
-                  >
-                    {submittingComment ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        Post
-                      </>
-                    )}
-                  </button>
+            {/* Comments List */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              {loadingComments ? (
+                <div className="flex justify-center py-12">
+                  <span className="loading loading-spinner loading-lg text-primary"></span>
                 </div>
+              ) : comments.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">💬</div>
+                  <p className="text-base-content font-medium text-lg">No comments yet</p>
+                  <p className="text-base-content/50 text-sm mt-2">Be the first to comment!</p>
+                </div>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment._id} className="flex gap-3 mb-5 group">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 p-0.5 flex-shrink-0">
+                      <img
+                        src={comment.user?.profilePicture || "/user.png"}
+                        alt={comment.user?.username || "User"}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 bg-base-200 rounded-2xl px-4 py-3 group-hover:bg-base-300 transition-colors">
+                      <p className="font-semibold text-base-content text-sm mb-1">
+                        {comment.user?.username || "User"}
+                      </p>
+                      <p className="text-base-content/80 text-sm leading-relaxed">{comment.text}</p>
+                      <p className="text-base-content/40 text-xs mt-2">
+                        {new Date(comment.createdAt).toLocaleDateString('en-US', {
+                          month: 'short', day: 'numeric', year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Comment Input */}
+            <div className="p-4 border-t border-base-300 bg-base-200/50">
+              <div className="flex gap-3 items-center">
+                <input
+                  type="text"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      submitComment(reels[currentIndex]._id);
+                    }
+                  }}
+                  placeholder="Add a comment..."
+                  className="flex-1 border-2 border-base-300 rounded-full px-5 py-3 text-sm focus:outline-none focus:border-primary transition-colors bg-base-100 text-base-content placeholder:text-base-content/40"
+                />
+                <button
+                  onClick={() => submitComment(reels[currentIndex]._id)}
+                  disabled={!commentText.trim() || submittingComment}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
+                >
+                  {submittingComment ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Post
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
       <style>{`
         @keyframes slide-up {

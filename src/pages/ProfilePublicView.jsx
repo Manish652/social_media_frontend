@@ -116,13 +116,13 @@ export default function ProfilePublicView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-20 h-20">
-            <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-purple-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-primary/30 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
           </div>
-          <p className="text-gray-600 font-medium">Loading profile...</p>
+          <p className="text-base-content/70 font-medium">Loading profile...</p>
         </div>
       </div>
     );
@@ -130,13 +130,13 @@ export default function ProfilePublicView() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center border border-red-100">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-red-600 text-2xl">⚠️</span>
+      <div className="min-h-screen bg-base-100 flex items-center justify-center p-6">
+        <div className="bg-base-100 rounded-3xl shadow-xl p-8 max-w-md text-center border border-error/20">
+          <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-error text-2xl">⚠️</span>
           </div>
-          <p className="text-red-600 font-semibold mb-2">Oops!</p>
-          <p className="text-gray-600 text-sm">{error}</p>
+          <p className="text-error font-semibold mb-2">Oops!</p>
+          <p className="text-base-content/70 text-sm">{error}</p>
         </div>
       </div>
     );
@@ -159,7 +159,7 @@ export default function ProfilePublicView() {
   const followingCount = Array.isArray(profile.following) ? profile.following.length : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 pb-24 lg:pb-8 lg:ml-64 xl:mr-80">
+    <div className="min-h-screen bg-base-100 pb-24 lg:pb-8 lg:ml-64 xl:mr-80">
       <FollowListModal
         isOpen={showFollowModal}
         onClose={() => setShowFollowModal(false)}
@@ -188,7 +188,7 @@ export default function ProfilePublicView() {
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 -mt-32 pb-12 z-10">
         {/* Main Profile Card */}
-        <div className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
+        <div className="bg-base-100/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-base-300 overflow-hidden">
           <div className="p-6 sm:p-10">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {/* Avatar Section */}
@@ -236,7 +236,7 @@ export default function ProfilePublicView() {
                     <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent mb-1">
                       {profile.username}
                     </h1>
-                    <p className="text-gray-500 font-medium">@{profile.username}</p>
+                    <p className="text-base-content/60 font-medium">@{profile.username}</p>
                   </div>
 
                   {/* Action Button */}
@@ -279,7 +279,7 @@ export default function ProfilePublicView() {
                             alert(err?.response?.data?.message || "Failed to start chat");
                           }
                         }}
-                        className="px-6 py-3 rounded-full font-bold bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-md flex items-center gap-2"
+                        className="px-6 py-3 rounded-full font-bold bg-base-100 border-2 border-base-300 text-base-content hover:bg-base-200 transition-all duration-200 shadow-md flex items-center gap-2"
                       >
                         <MessageCircle size={18} />
                         Message
@@ -291,7 +291,7 @@ export default function ProfilePublicView() {
                 {/* Bio */}
                 {profile.bio && (
                   <div className="mb-6 bg-base-200/50 rounded-2xl p-4 border border-base-300/50">
-                    <p className="text-gray-700 text-sm leading-relaxed">
+                    <p className="text-base-content text-sm leading-relaxed">
                       {profile.bio}
                     </p>
                   </div>
@@ -346,7 +346,7 @@ export default function ProfilePublicView() {
         {/* Content Section */}
         <div className="mt-6">
           {/* Tab Navigation */}
-          <div className="bg-white/90 backdrop-blur-2xl rounded-2xl shadow-lg border border-white/50 overflow-hidden mb-4">
+          <div className="bg-base-100/90 backdrop-blur-2xl rounded-2xl shadow-lg border border-base-300 overflow-hidden mb-4">
             <div className="grid grid-cols-3">
               <button
                 onClick={() => setActiveTab("posts")}
@@ -393,7 +393,7 @@ export default function ProfilePublicView() {
           </div>
 
           {/* Content Area */}
-          <div className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-lg border border-white/50 overflow-hidden">
+          <div className="bg-base-100/90 backdrop-blur-2xl rounded-3xl shadow-lg border border-base-300 overflow-hidden">
             {/* Posts Tab */}
             {activeTab === "posts" && (
               <>
@@ -438,8 +438,8 @@ export default function ProfilePublicView() {
                     <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Film size={32} className="text-purple-600" strokeWidth={2} />
                     </div>
-                    <p className="text-gray-600 font-semibold text-lg">No reels yet</p>
-                    <p className="text-gray-400 text-sm mt-1">
+                    <p className="text-base-content font-semibold text-lg">No reels yet</p>
+                    <p className="text-base-content/60 text-sm mt-1">
                       {isMe ? "Create your first reel!" : "Check back later for reels"}
                     </p>
                   </div>
@@ -465,8 +465,8 @@ export default function ProfilePublicView() {
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Bookmark size={32} className="text-purple-600" strokeWidth={2} />
                 </div>
-                <p className="text-gray-600 font-semibold text-lg">Saved posts are private</p>
-                <p className="text-gray-400 text-sm mt-1">Only you can see your saved posts</p>
+                <p className="text-base-content font-semibold text-lg">Saved posts are private</p>
+                <p className="text-base-content/60 text-sm mt-1">Only you can see your saved posts</p>
               </div>
             )}
           </div>

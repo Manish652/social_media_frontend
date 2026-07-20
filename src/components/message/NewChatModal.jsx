@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
 
-export default function NewChatModal({ isOpen, onClose }) {
+export default function NewChatModal({ isOpen, onClose, onChatCreated }) {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -37,7 +37,9 @@ export default function NewChatModal({ isOpen, onClose }) {
     try {
       setCreating(true);
       const { data } = await api.post("/chat/create", { userId });
-      const chatId = data?._id || data?.chat?._id || data?.chatId;
+      const chat = data?.chat || data;
+      const chatId = chat?._id;
+      if (onChatCreated && chat) onChatCreated(chat);
       onClose();
       navigate(chatId ? `/messages?chatId=${chatId}` : "/messages");
     } catch (err) {

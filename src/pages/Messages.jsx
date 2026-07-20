@@ -367,7 +367,17 @@ export default function Messages() {
         </div>
       )}
 
-      <NewChatModal isOpen={showNewChatModal} onClose={() => setShowNewChatModal(false)} />
+      <NewChatModal 
+        isOpen={showNewChatModal} 
+        onClose={() => setShowNewChatModal(false)}
+        onChatCreated={(newChat) => {
+          setChats(prev => {
+            const exists = prev.some(c => c._id === newChat._id);
+            return exists ? prev : [newChat, ...prev];
+          });
+          handleSelectChat(newChat);
+        }}
+      />
 
       {/* Media viewer lightbox */}
       {viewerMedia && (

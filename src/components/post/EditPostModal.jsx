@@ -31,15 +31,15 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div className="bg-base-100 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
-          <h3 className="text-lg font-semibold text-gray-900">Edit Post</h3>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-base-300 bg-base-200/50">
+          <h3 className="text-lg font-semibold text-base-content">Edit Post</h3>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/80 rounded-full transition-all hover:scale-110 active:scale-95"
+            className="p-2 hover:bg-base-300 rounded-full transition-all hover:scale-110 active:scale-95"
           >
-            <X size={20} className="text-gray-600" />
+            <X size={20} className="text-base-content/70" />
           </button>
         </div>
 
@@ -47,7 +47,7 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
         <form onSubmit={handleSubmit} className="p-6">
           {/* Post Preview */}
           {post?.image && (
-            <div className="mb-4 rounded-xl overflow-hidden border border-gray-200">
+            <div className="mb-4 rounded-xl overflow-hidden border border-base-300">
               <img
                 src={post.image}
                 alt="Post"
@@ -58,10 +58,10 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
 
           {/* Caption Input */}
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-base-content/80 mb-2">
               Caption
             </label>
-            <div className="w-full border-2 border-gray-200 rounded-xl px-2 py-1 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-100 transition-all">
+            <div className="w-full border-2 border-base-300 rounded-xl px-2 py-1 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/20 transition-all">
               <VibeInputEditor
                 value={caption}
                 onChange={setCaption}
@@ -71,14 +71,14 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
                 fontSize={15}
               />
             </div>
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-base-content/50">
               {caption.length} characters
             </div>
           </div>
 
           {/* Tags Input */}
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-base-content/80 mb-2">
               Tags
             </label>
             <TagsInput value={tags} onChange={setTags} placeholder="Add tags (e.g., WebDev, React)" />
@@ -89,7 +89,7 @@ export default function EditPostModal({ isOpen, onClose, post, onSave }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all hover:scale-[1.02] active:scale-95"
+              className="flex-1 px-4 py-3 bg-base-200 hover:bg-base-300 text-base-content/80 rounded-xl font-semibold transition-all hover:scale-[1.02] active:scale-95"
             >
               Cancel
             </button>

@@ -47,17 +47,17 @@ export default function FollowListModal({ isOpen, onClose, userId, type, current
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
+      <div className="bg-base-100 rounded-3xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-base-300">
           <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             {type === "followers" ? "Followers" : "Following"}
           </h3>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-base-200 rounded-full transition-colors"
           >
-            <X size={20} className="text-gray-600" />
+            <X size={20} className="text-base-content/70" />
           </button>
         </div>
 
@@ -70,40 +70,40 @@ export default function FollowListModal({ isOpen, onClose, userId, type, current
                 alt="Loading"
                 className="w-16 h-16"
               />
-              <p className="text-gray-500 text-sm mt-3">Loading...</p>
+              <p className="text-base-content/60 text-sm mt-3">Loading...</p>
             </div>
           ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-3">
+              <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mb-3">
                 <span className="text-3xl">👥</span>
               </div>
-              <p className="text-gray-500 font-medium">
+              <p className="text-base-content/70 font-medium">
                 No {type === "followers" ? "followers" : "following"} yet
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-base-200">
               {users.map((user) => (
                 <Link
                   key={user._id}
                   to={`/u/${user._id}`}
                   onClick={onClose}
-                  className="flex items-center gap-3 px-6 py-4 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all"
+                  className="flex items-center gap-3 px-6 py-4 hover:bg-base-200 transition-all"
                 >
                   <div className="relative">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full opacity-75"></div>
                     <img
                       src={user.profilePicture || "https://via.placeholder.com/48"}
                       alt={user.username}
-                      className="relative w-12 h-12 rounded-full object-cover border-2 border-white"
+                      className="relative w-12 h-12 rounded-full object-cover border-2 border-base-100"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">
+                    <p className="font-semibold text-base-content truncate">
                       {user.username}
                     </p>
                     {user.bio && (
-                      <p className="text-sm text-gray-500 truncate">
+                      <p className="text-sm text-base-content/70 truncate">
                         {user.bio}
                       </p>
                     )}
