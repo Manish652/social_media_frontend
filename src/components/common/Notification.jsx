@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import api from "../../api/axios.js";
 import toast from "react-hot-toast";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import socket from "../../lib/socket.js";
 
 export default function Notification({ token }) {
   const { theme } = useTheme();
@@ -59,6 +60,26 @@ export default function Notification({ token }) {
   useEffect(() => {
     if (token) fetchNotifications();
   }, [token, fetchNotifications]);
+
+  // 🔴 Real-time: listen for new notifications via socket
+  useEffect(() => {
+    if (!token) return;
+
+    const handleNewNotification = (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+      const username = notification.fromUser?.username || "Someone";
+      const type = notification.type;
+      const msg = type === "follow" ? `${username} started following you`
+        : type === "like" ? `${username} liked your post`
+        : type === "comment" ? `${username} commented on your post`
+        : type === "message" ? `${username} sent you a message`
+        : `${username} has an update`;
+      toast(msg, { icon: "🔔" });
+    };
+
+    socket.on("newNotification", handleNewNotification);
+    return () => socket.off("newNotification", handleNewNotification);
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;

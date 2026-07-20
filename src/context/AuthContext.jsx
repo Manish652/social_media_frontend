@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../api/axios.js";
 import { setToken as setMemoryToken } from "../utils/getToken.js";
+import socket from "../lib/socket.js";
 
 const AuthContext = createContext();
 
@@ -27,6 +28,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Connect socket whenever we have a token
+  useEffect(() => {
+    if (token) {
+      socket.auth = { token };
+      if (!socket.connected) {
+        socket.connect();
+        console.log("[AuthContext] Socket connecting with token...");
+      }
+    } else {
+      if (socket.connected) {
+        socket.disconnect();
+        console.log("[AuthContext] Socket disconnected (no token)");
+      }
+    }
+  }, [token]);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -78,13 +95,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setMemoryToken(null);
     localStorage.removeItem("user");
-
-    // Disconnect socket on logout
-    if (socket && socket.connected) {
-      console.log("[AuthContext] Disconnecting socket on logout");
-      socket.disconnect();
-    }
-
     toast.success("Logged out successfully!");
   };
 

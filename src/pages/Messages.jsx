@@ -34,28 +34,25 @@ export default function Messages() {
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
 
-  // Socket connection
+  // Online user tracking (socket is already connected via AuthContext)
   useEffect(() => {
-    if (user && token) {
-      socket.auth = { token };
-      if (!socket.connected) socket.connect();
+    if (!user) return;
 
-      const handleGetOnlineUsers = (users) => setOnlineUsers(new Set(users));
-      const handleUserOnline = (userId) => setOnlineUsers((prev) => { const s = new Set(prev); s.add(userId); return s; });
-      const handleUserOffline = (userId) => setOnlineUsers((prev) => { const s = new Set(prev); s.delete(userId); return s; });
+    const handleGetOnlineUsers = (users) => setOnlineUsers(new Set(users));
+    const handleUserOnline = (userId) => setOnlineUsers((prev) => { const s = new Set(prev); s.add(userId); return s; });
+    const handleUserOffline = (userId) => setOnlineUsers((prev) => { const s = new Set(prev); s.delete(userId); return s; });
 
-      socket.on("getOnlineUsers", handleGetOnlineUsers);
-      socket.on("userOnline", handleUserOnline);
-      socket.on("userOffline", handleUserOffline);
+    socket.on("getOnlineUsers", handleGetOnlineUsers);
+    socket.on("userOnline", handleUserOnline);
+    socket.on("userOffline", handleUserOffline);
 
-      return () => {
-        socket.off("getOnlineUsers", handleGetOnlineUsers);
-        socket.off("userOnline", handleUserOnline);
-        socket.off("userOffline", handleUserOffline);
-        socket.disconnect();
-      };
-    }
-  }, [user, token]);
+    return () => {
+      socket.off("getOnlineUsers", handleGetOnlineUsers);
+      socket.off("userOnline", handleUserOnline);
+      socket.off("userOffline", handleUserOffline);
+      // ❌ DO NOT disconnect socket here — AuthContext manages it globally
+    };
+  }, [user]);
 
   useEffect(() => {
     const handleNewMessage = (newMessage) => {
