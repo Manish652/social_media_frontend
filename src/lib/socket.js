@@ -17,15 +17,15 @@ socket.on("connect", () => {
 });
 
 socket.on("connect_error", (err) => {
-  console.error("❌ [socket] connect_error:", err?.message || err);
+  console.error("[socket] connect_error:", err?.message || err);
 });
 
 socket.on("error", (err) => {
-  console.error("❌ [socket] error:", err?.message || err);
+  console.error("[socket] error:", err?.message || err);
 });
 
 socket.on("disconnect", (reason) => {
-  console.log("⚠️ [socket] disconnected:", reason);
+  console.log("[socket] disconnected:", reason);
 });
 
 export default socket;
